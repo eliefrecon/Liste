@@ -1,0 +1,861 @@
+/* ==========================================================================
+   style.css — direction artistique.
+
+   Parti pris : un fond bleu d'encre profond, un accent orange chaud, et du
+   vert pour ce qui va bien. Le texte principal est franc — gros et gras ;
+   seules les informations de second rang restent fines et petites. Les
+   surfaces sont des blocs pleins aux angles arrondis, pas des filets timides :
+   l'écran doit avoir de la matière, pas du vide.
+
+   Contrainte n°1 : les ~21 lignes de l'écran Liste tiennent sur un seul écran
+   de téléphone, sans défilement. Les lignes sont donc élastiques (flex: 1) :
+   elles se répartissent la hauteur disponible et se compriment si la liste
+   s'allonge.
+   ========================================================================== */
+
+:root {
+  --fond:        #0b1017;   /* bleu d'encre, presque noir */
+  --fond-haut:   #111a26;
+  --surface:     #141e2b;   /* cartes, pastilles de compteur */
+  --surface-2:   #1c2836;
+  --texte:       #f1f5fa;
+  --attenue:     #93a1b3;
+  --tres-attenue:#5a6a7d;
+  --filet:       rgba(150, 175, 205, 0.16);
+  --filet-fort:  rgba(150, 175, 205, 0.34);
+
+  --accent:      #ff8a3d;   /* orange chaud : l'état coché */
+  --accent-vif:  #ff9f5e;
+  --accent-doux: rgba(255, 138, 61, 0.15);
+  --sur-accent:  #1b0f05;   /* ce qui se pose sur l'orange */
+
+  --vert:        #46c98b;
+  --bleu:        #58a6f0;
+  --rouge:       #f2695c;
+
+  --rayon:  13px;
+  --rayon-l: 18px;
+  --duree: 240ms;
+  --courbe: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: dark;
+}
+
+/* Thème clair : mêmes rôles, valeurs inversées. L'application est surtout
+   consultée le soir, le sombre reste donc la référence. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --fond:        #eef1f6;
+    --fond-haut:   #ffffff;
+    --surface:     #ffffff;
+    --surface-2:   #e3e9f1;
+    --texte:       #0d1621;
+    --attenue:     #5a6a7d;
+    --tres-attenue:#93a1b3;
+    --filet:       rgba(13, 22, 33, 0.14);
+    --filet-fort:  rgba(13, 22, 33, 0.30);
+
+    --accent:      #dd6a1c;
+    --accent-vif:  #c85c14;
+    --accent-doux: rgba(221, 106, 28, 0.15);
+    --sur-accent:  #ffffff;
+
+    --vert:        #1c8f60;
+    --bleu:        #2b6fc4;
+    --rouge:       #c8463a;
+    color-scheme: light;
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--fond);
+  color: var(--texte);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.012em;
+  /* L'utilisateur ne doit jamais pouvoir zoomer ou tirer la page par erreur. */
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+}
+button { cursor: pointer; }
+
+/* --- Écrans et transitions ------------------------------------------------ */
+
+.ecran {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--fond);
+  transform: translateX(100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform var(--duree) var(--courbe),
+              opacity   var(--duree) var(--courbe),
+              visibility 0s linear var(--duree);
+}
+.ecran.actif {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+  transition: transform var(--duree) var(--courbe),
+              opacity   var(--duree) var(--courbe),
+              visibility 0s;
+}
+/* Écran resté « derrière » : il recule au lieu de simplement disparaître. */
+.ecran.gauche { transform: translateX(-18%); opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ecran { transition-duration: 1ms; }
+}
+
+/* --- En-tête des écrans secondaires --------------------------------------- */
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  border-bottom: 1px solid var(--filet);
+  background: var(--fond-haut);
+}
+.entete h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.entete .droite {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--attenue);
+}
+
+.retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--accent);
+  font-size: 15.5px;
+  font-weight: 650;
+  padding: 6px 8px 6px 0;
+}
+.retour::before { content: "‹"; font-size: 25px; font-weight: 400; line-height: 0.7; }
+
+/* ==========================================================================
+   ÉCRAN LISTE
+   ========================================================================== */
+
+#ecran-liste {
+  padding: calc(env(safe-area-inset-top) + 8px) 0 calc(env(safe-area-inset-bottom) + 8px);
+}
+
+#lignes {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  /* Quand la liste est courte (jour de stade, protocole en cours), les lignes
+     ne s'étirent pas jusqu'à devenir difformes : elles se centrent. */
+  justify-content: center;
+  min-height: 0;
+  padding: 0 12px;
+  overflow: hidden;   /* garde-fou : jamais de défilement ici */
+}
+
+.ligne {
+  flex: 1 1 0;
+  min-height: 24px;
+  max-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 9px;
+  text-align: left;
+  position: relative;
+  border-radius: 11px;
+  transition: background 200ms var(--courbe);
+}
+/* Une ligne cochée devient une bande pleine, et son nom s'éteint. Ce qui
+   reste à faire est donc ce qui est écrit en clair et en gras : l'œil trie
+   les vingt lignes sans les lire. L'orange n'apparaît que dans la pastille,
+   sinon l'écran vire au monochrome dès que tout est coché. */
+.ligne.faite { background: rgba(255, 138, 61, 0.1); }
+
+.ligne + .ligne::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 43px; right: 9px;
+  border-top: 1px solid var(--filet);
+}
+/* Pas de filet au contact d'une bande colorée : le bloc se suffit. */
+.ligne.faite::before,
+.ligne.faite + .ligne::before { border-top-color: transparent; }
+
+/* Une ligne qui porte une information secondaire reçoit un peu plus de
+   hauteur que les autres — le total reste celui de l'écran. */
+.ligne.avec-note { flex-grow: 1.45; min-height: 32px; }
+
+/* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
+.ligne.eclat { animation: eclat 300ms ease-out; }
+@keyframes eclat {
+  from { background: rgba(255, 138, 61, 0.34); }
+  to   { background: rgba(255, 138, 61, 0.1); }
+}
+
+/* La pastille : vide, partiellement remplie, ou pleine. */
+.puce {
+  position: relative;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--filet-fort);
+  display: grid;
+  place-items: center;
+  transition: border-color 180ms var(--courbe);
+}
+/* Le pavé intérieur. Pour un compteur il grandit proportionnellement à
+   l'avancement (0,33 pour 1/3 d'eau) : on voit la progression sans lire. */
+.puce i {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transform: scale(0);
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ligne.faite .puce { border-color: var(--accent); }
+
+/* Le crochet, tracé en CSS, n'apparaît qu'une fois la pastille pleine. */
+.puce i::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 5px;
+  border-left: 2.4px solid var(--sur-accent);
+  border-bottom: 2.4px solid var(--sur-accent);
+  border-radius: 1px;
+  transform: translate(-50%, -68%) rotate(-45deg);
+  opacity: 0;
+  transition: opacity 110ms 100ms linear;
+}
+.ligne.faite .puce i::after { opacity: 1; }
+
+.txt {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+.nom {
+  font-size: clamp(13.5px, 2.05vh, 17px);
+  font-weight: 640;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 200ms var(--courbe);
+}
+.note {
+  font-size: clamp(9.5px, 1.35vh, 11.5px);
+  font-weight: 500;
+  color: var(--attenue);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0;
+}
+.ligne.faite .nom { color: var(--attenue); }
+.ligne.faite .note { color: var(--tres-attenue); }
+
+/* Le compteur est aussi un bouton : le taper retire une unité. Il en a donc
+   l'aspect — un pavé posé, pas un simple chiffre gris. */
+.cpt {
+  flex: 0 0 auto;
+  min-width: 40px;
+  padding: 3px 7px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  font-size: clamp(10px, 1.42vh, 12.5px);
+  font-weight: 700;
+  color: var(--attenue);
+  text-align: center;
+  line-height: 1.25;
+}
+.cpt:empty { display: none; }
+.ligne.faite .cpt {
+  background: transparent;
+  border-color: var(--accent-doux);
+  color: var(--accent-vif);
+}
+.cpt.doute::after {
+  /* Le quota repose sur des heures non confirmées : on le signale. */
+  content: "•";
+  color: var(--accent);
+  margin-left: 3px;
+}
+
+/* Le seul autre élément de l'écran d'accueil. */
+#bascule {
+  flex: 0 0 auto;
+  height: 50px;
+  margin: 10px 12px 0;
+  border-radius: var(--rayon);
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  color: var(--texte);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: background 160ms, border-color 160ms;
+}
+#bascule::after { content: "  ›"; font-weight: 400; color: var(--accent); }
+#bascule:active { background: var(--surface-2); border-color: var(--filet-fort); }
+
+/* Dernier recours si la liste s'allonge au point de déborder. Avec la liste
+   de départ (21 lignes) ce mode ne sert jamais, même sur un iPhone SE ; il
+   prend le relais au-delà d'environ 24 habitudes. */
+.tres-dense .ligne { min-height: 17.5px; }
+.tres-dense .ligne.avec-note { min-height: 24px; }
+.tres-dense .nom { font-size: clamp(12px, 1.8vh, 14.5px); }
+.tres-dense .note { font-size: clamp(9px, 1.2vh, 10.5px); }
+.tres-dense .puce { width: 18px; height: 18px; border-radius: 6px; border-width: 1.8px; }
+.tres-dense .ligne + .ligne::before { left: 39px; }
+
+/* Le dimanche de repos : récompense rare, écran soigné. */
+#repos {
+  flex: 1 1 auto;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 32px;
+  text-align: center;
+}
+body.repos #repos { display: flex; }
+body.repos #lignes { display: none; }
+
+#repos .sceau {
+  width: 62px; height: 62px;
+  border-radius: 20px;
+  background: var(--accent-doux);
+  border: 2px solid var(--accent);
+  display: grid; place-items: center;
+  color: var(--accent);
+  font-size: 25px;
+  animation: souffle 5s ease-in-out infinite;
+}
+@keyframes souffle {
+  0%, 100% { transform: scale(1);    opacity: 0.9; }
+  50%      { transform: scale(1.06); opacity: 1; }
+}
+#repos h2 {
+  margin: 0;
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+#repos p {
+  margin: 0;
+  color: var(--attenue);
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 20em;
+}
+
+/* ==========================================================================
+   ÉCRAN PROGRESSION
+   ========================================================================== */
+
+.defilant {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px calc(env(safe-area-inset-bottom) + 40px);
+}
+
+.bloc { padding: 20px 2px; border-bottom: 1px solid var(--filet); }
+.bloc:last-child { border-bottom: 0; }
+.bloc > h2 {
+  margin: 0 0 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--attenue);
+}
+
+/* --- Heures hors de la maison : l'élément dominant de l'écran ------------- */
+
+#bloc-heures {
+  margin-top: 16px;
+  padding: 20px 18px 18px;
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon-l);
+  background: var(--surface);
+  text-align: center;
+}
+#bloc-heures > h2 { margin-bottom: 6px; }
+#heures-valeur {
+  font-size: 62px;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  margin: 4px 0 6px;
+}
+#heures-valeur small {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--attenue);
+  letter-spacing: -0.02em;
+}
+#heures-etat {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--attenue);
+  min-height: 17px;
+}
+#heures-etat.propose { color: var(--accent); }
+
+.reglette { display: flex; align-items: center; gap: 12px; margin: 16px 0 14px; }
+.reglette button {
+  flex: 0 0 auto;
+  width: 46px; height: 46px;
+  background: var(--surface-2);
+  border: 1px solid var(--filet);
+  border-radius: 14px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--texte);
+  transition: background 140ms, border-color 140ms;
+}
+.reglette button:active { background: var(--accent-doux); border-color: var(--accent); }
+
+input[type="range"] {
+  flex: 1 1 auto;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 30px;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px; height: 26px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+}
+input[type="range"]::-moz-range-track { height: 6px; background: var(--surface-2); border-radius: 6px; }
+input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px; border: 3px solid var(--surface);
+  border-radius: 50%; background: var(--accent);
+}
+
+/* --- Boutons génériques --------------------------------------------------- */
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 15px 14px;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  text-align: center;
+  transition: background 140ms, border-color 140ms, opacity 140ms;
+}
+.btn:active { background: var(--surface-2); border-color: var(--filet-fort); }
+.btn.plein {
+  background: var(--accent);
+  color: var(--sur-accent);
+  border-color: var(--accent);
+  font-weight: 750;
+}
+.btn.plein:active { background: var(--accent-vif); }
+.btn.discret { background: transparent; color: var(--attenue); font-weight: 600; }
+/* Un bouton inactif ne doit pas ressembler à un bouton plein délavé :
+   il redevient une simple mention posée. */
+.btn:disabled {
+  background: transparent;
+  color: var(--tres-attenue);
+  border-color: var(--filet);
+  font-weight: 600;
+}
+.btn-rang { display: flex; gap: 10px; }
+.btn-rang .btn { flex: 1 1 0; }
+.pile > * + * { margin-top: 10px; }
+
+/* --- Listes de l'écran progression ---------------------------------------- */
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--filet);
+  width: 100%;
+  text-align: left;
+}
+.item:last-child { border-bottom: 0; }
+.item .ptxt { flex: 1 1 auto; min-width: 0; }
+.item .ptitre { font-size: 15.5px; font-weight: 650; letter-spacing: -0.02em; }
+.item .psous { font-size: 12px; font-weight: 500; color: var(--attenue); margin-top: 2px; }
+.item .paction {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: var(--accent-doux);
+}
+.item.fait .ptitre { color: var(--attenue); }
+
+/* L'interrupteur « comme si j'étais allé au stade ». */
+.voyant {
+  flex: 0 0 auto;
+  width: 48px; height: 29px;
+  border-radius: 15px;
+  background: var(--surface-2);
+  border: 1px solid var(--filet);
+  padding: 2px;
+  transition: background 180ms var(--courbe), border-color 180ms;
+}
+.voyant i {
+  display: block;
+  width: 23px; height: 23px;
+  border-radius: 50%;
+  background: var(--tres-attenue);
+  transition: transform 200ms var(--courbe), background 180ms;
+}
+.interrupteur.actif .voyant { background: var(--accent-doux); border-color: var(--accent); }
+.interrupteur.actif .voyant i { transform: translateX(19px); background: var(--accent); }
+.interrupteur.actif .ptitre { color: var(--accent-vif); }
+
+.vide { color: var(--tres-attenue); font-size: 13px; font-weight: 500; padding: 4px 0; }
+
+.etiq {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--accent-doux);
+  color: var(--accent);
+}
+
+/* --- Statistiques --------------------------------------------------------- */
+
+.chiffres { display: flex; gap: 9px; }
+.chiffre {
+  flex: 1 1 0;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  padding: 14px 8px 12px;
+  text-align: center;
+}
+.chiffre b {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.chiffre span {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--attenue);
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+}
+.chiffre.bien b { color: var(--vert); }
+.chiffre.alerte b { color: var(--rouge); }
+
+#regle-dimanche { font-weight: 500; color: var(--attenue); }
+
+.graph {
+  height: 176px;
+  padding: 12px 10px 6px;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  position: relative;
+}
+
+/* Barres horizontales du taux par habitude — en HTML pur, plus lisible qu'un
+   graphique et toujours affiché même si le CDN est injoignable. */
+.barre { padding: 9px 0 10px; border-bottom: 1px solid var(--filet); }
+.barre:last-child { border-bottom: 0; }
+.barre .haut { display: flex; align-items: baseline; gap: 8px; }
+.barre .haut b {
+  flex: 1 1 auto;
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.barre .haut span { flex: 0 0 auto; color: var(--attenue); font-size: 12px; font-weight: 650; }
+.barre .piste {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.barre .jauge {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+  transition: width 400ms var(--courbe);
+}
+.barre.faible .jauge { background: var(--rouge); }
+.barre.forte  .jauge { background: var(--vert); }
+.barre.faible .haut span { color: var(--rouge); }
+.barre.forte  .haut span { color: var(--vert); }
+
+/* ==========================================================================
+   OVERLAYS
+   ========================================================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: rgba(6, 10, 16, 0.9);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  animation: apparait 180ms ease-out;
+}
+.overlay[hidden] { display: none; }
+@keyframes apparait { from { opacity: 0; } to { opacity: 1; } }
+
+/* L'overlay GTG : franc, plein écran, sans échappatoire. */
+#overlay-gtg {
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 28px;
+  text-align: center;
+  background: var(--fond);
+}
+#overlay-gtg h2 {
+  margin: 0;
+  font-size: 46px;
+  font-weight: 750;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  animation: monte 300ms var(--courbe);
+}
+@keyframes monte { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+#gtg-detail {
+  color: var(--attenue);
+  font-size: 15px;
+  font-weight: 600;
+  margin: -10px 0 0;
+  max-width: 20em;
+}
+#gtg-compte {
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: var(--accent-doux);
+}
+#overlay-gtg .boutons { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 310px; }
+#overlay-gtg .btn { padding: 18px; font-size: 17px; border-radius: var(--rayon-l); }
+
+/* Modale générique (protocole, import, confirmation). */
+#modale { justify-content: flex-end; }
+.feuille {
+  background: var(--fond-haut);
+  border-top: 1px solid var(--filet);
+  border-radius: 22px 22px 0 0;
+  padding: 22px 18px calc(env(safe-area-inset-bottom) + 20px);
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: glisse 260ms var(--courbe);
+}
+@keyframes glisse { from { transform: translateY(100%); } to { transform: none; } }
+.feuille h2 { margin: 0 0 5px; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+.feuille p.intro { margin: 0 0 16px; color: var(--attenue); font-size: 13.5px; font-weight: 500; }
+
+.champ {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  font-size: 16px;   /* 16 px minimum : en dessous, iOS zoome à la saisie */
+  font-weight: 550;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.champ:focus { outline: none; border-color: var(--accent); }
+
+.choix {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--filet);
+  border-radius: 10px;
+  text-align: left;
+}
+.choix:last-of-type { border-bottom: 0; }
+.choix b { flex: 0 0 104px; font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.choix span { flex: 1 1 auto; font-size: 12.5px; font-weight: 500; color: var(--attenue); line-height: 1.3; }
+.choix:active { background: var(--accent-doux); }
+
+/* ==========================================================================
+   ÉDITEUR DE LISTE
+   ========================================================================== */
+
+#zone-edition {
+  flex: 1 1 auto;
+  position: relative;
+  margin: 12px;
+  min-height: 0;
+}
+/* La coloration est un calque affiché derrière une zone de texte transparente,
+   parfaitement superposée. Les deux doivent partager exactement la même
+   typographie et les mêmes marges. */
+#coloration, #edition {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.66;
+  letter-spacing: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow-y: auto;
+  tab-size: 2;
+}
+#coloration { color: var(--texte); pointer-events: none; background: var(--surface); }
+#edition {
+  color: transparent;
+  caret-color: var(--accent);
+  background: transparent;
+  resize: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+#edition:focus { outline: none; }
+#coloration b.m {
+  color: var(--rouge);
+  background: rgba(242, 105, 92, 0.16);
+  border-radius: 4px;
+  font-weight: 700;
+}
+#coloration b.w {
+  color: var(--bleu);
+  background: rgba(88, 166, 240, 0.18);
+  border-radius: 4px;
+  padding: 0 2px;
+  font-weight: 750;
+}
+#coloration span.err {
+  display: inline-block;
+  width: 100%;
+  text-decoration: underline wavy var(--rouge);
+  text-underline-offset: 4px;
+}
+
+.aide {
+  padding: 0 14px calc(env(safe-area-inset-bottom) + 14px);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--attenue);
+  line-height: 1.5;
+}
+.aide code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--texte);
+  font-weight: 650;
+}
+#etat-edition { color: var(--rouge); font-weight: 650; min-height: 16px; display: block; margin-top: 5px; }
+
+/* ==========================================================================
+   ÉCRAN RÈGLES
+   ========================================================================== */
+
+.regle { padding: 16px 0; border-bottom: 1px solid var(--filet); }
+.regle h3 { margin: 0 0 7px; font-size: 16.5px; font-weight: 700; letter-spacing: -0.025em; }
+.regle textarea {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 7px 9px;
+  margin-left: -9px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--attenue);
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.regle textarea:focus {
+  outline: none;
+  color: var(--texte);
+  border-color: var(--filet);
+  background: var(--surface);
+}

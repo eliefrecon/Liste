@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Liste</title>
+
+<!-- viewport-fit=cover : la page occupe l'écran jusque sous l'encoche.
+     maximum-scale + user-scalable=no : pas de zoom accidentel au double-tap. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+
+<!-- Ajout à l'écran d'accueil iOS, ouverture en plein écran sans barre Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Liste">
+<meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<link rel="icon" href="icones/icone-192.png">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- Graphique par CDN. Si le réseau est absent, l'application fonctionne
+     normalement : seule la courbe des 30 jours est remplacée par un texte. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+
+<!-- =====================================================================
+     1. ÉCRAN LISTE — l'accueil. Les lignes, et le bouton de bascule.
+     Rien d'autre : pas de menu, pas de réglage, pas de statistique.
+     ===================================================================== -->
+<section id="ecran-liste" class="ecran actif">
+  <div id="lignes"></div>
+
+  <!-- Affiché à la place de la liste les dimanches de repos mérité. -->
+  <div id="repos">
+    <div class="sceau">✦</div>
+    <h2>Tu as réussi ta semaine.<br>Repose-toi aujourd’hui.</h2>
+    <p id="repos-detail"></p>
+  </div>
+
+  <button id="bascule">Progression</button>
+</section>
+
+<!-- =====================================================================
+     2. ÉCRAN PROGRESSION — tout le reste.
+     ===================================================================== -->
+<section id="ecran-progression" class="ecran">
+  <header class="entete">
+    <button class="retour" data-vers="liste">Liste</button>
+    <h1>Progression</h1>
+    <span class="droite" id="prog-date"></span>
+  </header>
+
+  <div class="defilant">
+
+    <!-- Le compteur d'heures : élément dominant, tout le quota GTG en dépend. -->
+    <section class="bloc" id="bloc-heures">
+      <h2>Heures hors de la maison</h2>
+      <div id="heures-valeur">0<small>h</small></div>
+      <div id="heures-etat"></div>
+      <div class="reglette">
+        <button id="heures-moins" aria-label="Moins">−</button>
+        <input type="range" id="heures-curseur" min="0" max="16" step="0.25" value="0">
+        <button id="heures-plus" aria-label="Plus">+</button>
+      </div>
+      <button class="btn plein" id="heures-confirmer">Confirmer</button>
+    </section>
+
+    <!-- Rappel du quota du jour et de son origine. -->
+    <section class="bloc" id="bloc-gtg">
+      <h2>Grease the groove</h2>
+      <div id="gtg-resume"></div>
+    </section>
+
+    <section class="bloc">
+      <h2>Protocole d’évaluation</h2>
+      <div id="liste-protocoles"></div>
+      <button class="btn" id="btn-protocole" style="margin-top:10px">Lancer un protocole</button>
+    </section>
+
+    <section class="bloc">
+      <h2>Habitudes retirées aujourd’hui</h2>
+      <div id="liste-retirees"></div>
+    </section>
+
+    <section class="bloc">
+      <h2>Où j’en suis</h2>
+      <div class="chiffres" id="chiffres"></div>
+      <p class="vide" id="regle-dimanche" style="margin:10px 0 0"></p>
+    </section>
+
+    <section class="bloc">
+      <h2>30 derniers jours</h2>
+      <div class="graph"><canvas id="graph-30"></canvas></div>
+      <div id="graph-secours" class="vide" hidden>Graphique indisponible hors ligne.</div>
+    </section>
+
+    <section class="bloc">
+      <h2>Taux de réussite par habitude</h2>
+      <div id="taux-habitudes"></div>
+    </section>
+
+    <section class="bloc pile">
+      <button class="btn" data-vers="editeur">Éditeur de liste</button>
+      <button class="btn" data-vers="regles">Règles</button>
+    </section>
+
+    <section class="bloc pile">
+      <h2>Sauvegarde</h2>
+      <div class="btn-rang">
+        <button class="btn discret" id="btn-export">Exporter</button>
+        <button class="btn discret" id="btn-import">Importer</button>
+      </div>
+      <p class="vide" style="margin:6px 0 0">
+        La seule sauvegarde possible : le navigateur peut purger son stockage
+        à tout moment. Exporte de temps en temps.
+      </p>
+      <input type="file" id="fichier-import" accept="application/json,.json" hidden>
+    </section>
+
+  </div>
+</section>
+
+<!-- =====================================================================
+     3. ÉDITEUR DE LISTE
+     ===================================================================== -->
+<section id="ecran-editeur" class="ecran">
+  <header class="entete">
+    <button class="retour" data-vers="progression">Progression</button>
+    <h1>Éditeur de liste</h1>
+  </header>
+  <div id="zone-edition">
+    <pre id="coloration" aria-hidden="true"></pre>
+    <textarea id="edition" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+  </div>
+  <p class="aide">
+    Une ligne = une habitude, dans l’ordre d’affichage.
+    Marqueurs : <code>(évale)</code> <code>(stade)</code> <code>(jeudi)</code>.
+    Poids GTG en fin de ligne : <code>1</code> ou <code>2</code>.
+    <span id="etat-edition"></span>
+  </p>
+</section>
+
+<!-- =====================================================================
+     4. RÈGLES
+     ===================================================================== -->
+<section id="ecran-regles" class="ecran">
+  <header class="entete">
+    <button class="retour" data-vers="progression">Progression</button>
+    <h1>Règles</h1>
+  </header>
+  <div class="defilant" id="liste-regles"></div>
+</section>
+
+<!-- =====================================================================
+     OVERLAYS
+     ===================================================================== -->
+<div id="overlay-gtg" class="overlay" hidden>
+  <div id="gtg-compte"></div>
+  <h2>Fais ton GTG</h2>
+  <p id="gtg-detail"></p>
+  <div class="boutons">
+    <button class="btn plein" id="gtg-fait">Fait</button>
+    <button class="btn" id="gtg-absent">Pas chez moi</button>
+  </div>
+</div>
+
+<div id="modale" class="overlay" hidden>
+  <div class="feuille" id="modale-contenu"></div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
