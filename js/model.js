@@ -12,8 +12,29 @@ import {
   ajouterJours, lundiDeLaSemaine, cle, versDate,
 } from './dates.js';
 import { analyserListe, sansAccent } from './parser.js';
-import { GTG_IMPAIR, GTG_PAIR } from './defaults.js';
 import { jourVierge } from './store.js';
+
+/**
+ * Nombre de taps pour valider la ligne « Eau ». Chaque litre se coche en
+ * quatre fois, un quart de litre par tap. L'objectif se règle dans l'écran
+ * Règles : changer 3 en 2 litres fait passer la ligne de 12 à 8 taps.
+ */
+export const TAPS_PAR_LITRE = 4;
+
+export function quartsPourObjectif(reglages) {
+  const litres = Number(reglages && reglages.eauLitres);
+  return Math.max(1, Math.round((Number.isFinite(litres) ? litres : 3) * TAPS_PAR_LITRE));
+}
+
+const FRACTIONS = ['', '¼', '½', '¾'];
+
+/** 7 quarts → « 1¾ ». Sert au compteur de la ligne Eau. */
+export function formatLitres(quarts) {
+  const entier = Math.floor(quarts / TAPS_PAR_LITRE);
+  const reste = quarts % TAPS_PAR_LITRE;
+  if (!reste) return String(entier);
+  return (entier ? String(entier) : '') + FRACTIONS[reste];
+}
 
 // --- Reconnaissance des lignes particulières -------------------------------
 
@@ -188,7 +209,10 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
   const impair = estJourImpair(k);
   const quota = quotaGTG(etat, k, jour);
   const heures = heuresRetenues(etat, k, jour);
-  const ctx = { k, jsem, impair, protos, quota };
+  // Les réglages voyagent dans le contexte : exercices du jour, détail des
+  // deux prises de médicaments, objectif d'eau.
+  const ctx = { k, jsem, impair, protos, quota, reglages: etat.reglages };
+  const quartsEau = quartsPourObjectif(etat.reglages);
 
   // Étapes de protocole : on ne compte que les matières encore actives.
   const matieresActives = protos.map((p) => p.matiere);
@@ -199,7 +223,7 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
 
   const lignes = habitudes.map((h) => {
     const type = typeHabitude(h.nom);
-    const max = type === 'eau' ? 3
+    const max = type === 'eau' ? quartsEau
       : type === 'prises' ? 2
       : type === 'gtg' ? quota
       : type === 'protocole' ? protos.length
@@ -257,19 +281,22 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
   };
 }
 
-/** Texte secondaire affiché à droite ou sous le nom, calculé chaque jour. */
+/** Texte secondaire affiché sous le nom, recalculé chaque jour. */
 function noteDynamique(ligne, ctx, etapesFaites) {
   const n = sansAccent(ligne.nom);
+  const r = ctx.reglages;
 
   // Programmation : OpenClassrooms les jours impairs, Lerno les jours pairs.
   if (n.startsWith('programmation')) return ctx.impair ? 'OpenClassrooms' : 'Lerno';
 
-  if (ligne.type === 'gtg') return (ctx.impair ? GTG_IMPAIR : GTG_PAIR).join(' · ');
+  // Les exercices du jour, tels qu'ils sont écrits dans les Règles.
+  if (ligne.type === 'gtg') return (ctx.impair ? r.gtgImpair : r.gtgPair) || '';
 
-  // Deux prises distinctes : la note dit laquelle est déjà faite.
+  // Deux prises distinctes : la note dit laquelle est déjà faite, et de quoi
+  // chacune se compose — le détail vient lui aussi des Règles.
   if (ligne.type === 'prises') {
-    if (ligne.valeur === 0) return 'psyllium le matin';
-    if (ligne.valeur === 1) return 'psyllium fait — reste le soir';
+    if (ligne.valeur === 0) return `matin : ${r.medMatin}`;
+    if (ligne.valeur === 1) return `matin fait · soir : ${r.medSoir}`;
     return 'les deux prises faites';
   }
 
@@ -320,7 +347,8 @@ export function taper(etat, ligne, jourCalcule) {
       j.gtgSeries = v + 1;
       return true;
     case 'eau':
-      if (v >= 3) return false;
+      // Un tap = un quart de litre. Le maximum dépend de l'objectif réglé.
+      if (v >= ligne.max) return false;
       j.cases[ligne.nom] = v + 1;
       return true;
     case 'prises':

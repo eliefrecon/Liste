@@ -22,10 +22,15 @@
 // }
 // ---------------------------------------------------------------------------
 
-import { LISTE_PAR_DEFAUT, REGLES_PAR_DEFAUT } from './defaults.js';
+import { LISTE_PAR_DEFAUT, REGLES_PAR_DEFAUT, REGLAGES_PAR_DEFAUT } from './defaults.js';
 import { cleAujourdhui } from './dates.js';
 
 const CLE_STOCKAGE = 'habitudes.v1';
+
+// Version du format des données. À incrémenter quand une nouvelle donnée
+// apparaît : consolider() se charge alors de compléter les sauvegardes
+// existantes sans rien perdre de ce qui est déjà enregistré.
+const VERSION = 2;
 
 /** Fabrique un objet « journée » vierge. */
 export function jourVierge(date = cleAujourdhui()) {
@@ -44,9 +49,10 @@ export function jourVierge(date = cleAujourdhui()) {
 /** Fabrique un état complet par défaut (premier lancement). */
 export function etatParDefaut() {
   return {
-    version: 1,
+    version: VERSION,
     liste: LISTE_PAR_DEFAUT,
     regles: REGLES_PAR_DEFAUT.map((r) => ({ ...r })),
+    reglages: { ...REGLAGES_PAR_DEFAUT },
     jour: jourVierge(),
     histoire: {},
     protocoles: [],
@@ -72,6 +78,23 @@ function consolider(brut) {
   const log = e.heuresLog && typeof e.heuresLog === 'object' ? e.heuresLog : {};
   e.heuresLog = {};
   for (let j = 0; j < 7; j++) e.heuresLog[j] = Array.isArray(log[j]) ? log[j] : [];
+
+  // Les réglages structurés : on complète champ par champ, pour qu'une
+  // sauvegarde partielle ou ancienne ne laisse jamais un champ manquant.
+  e.reglages = { ...def.reglages, ...(brut && brut.reglages ? brut.reglages : {}) };
+  const litres = Number(e.reglages.eauLitres);
+  e.reglages.eauLitres = Number.isFinite(litres) && litres > 0 ? litres : def.reglages.eauLitres;
+
+  // Migration vers la version 2 : la consigne des médicaments n'existait pas.
+  // On l'ajoute aux sauvegardes plus anciennes sans toucher au reste.
+  if (!(Number(brut && brut.version) >= 2)) {
+    const dejaLa = e.regles.some((r) => /^psy/i.test(r.titre.trim()));
+    if (!dejaLa) {
+      const modele = def.regles.find((r) => /^psy/i.test(r.titre));
+      if (modele) e.regles.push({ ...modele });
+    }
+  }
+  e.version = VERSION;
   return e;
 }
 

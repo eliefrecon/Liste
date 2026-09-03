@@ -92,12 +92,32 @@ puis ouvrir `http://localhost:8765`.
 
 ---
 
+## Les réglages : une seule source de vérité
+
+Trois contenus s'affichent sur l'écran Liste mais se modifient dans l'écran
+**Règles**, tout en haut, dans des champs identifiés :
+
+| Champ | Ce qu'il pilote |
+| --- | --- |
+| Grease the groove — jours impairs / pairs | le texte affiché sous « Grease the groove » |
+| Médicaments — prise du matin / du soir | le texte affiché sous la ligne des médicaments, et son état intermédiaire |
+| Eau — objectif en litres | le nombre de taps de la ligne « Eau » |
+
+Ils ne sont écrits qu'à un seul endroit (`reglages` dans le stockage) : modifier
+un champ met la liste à jour immédiatement. Le reste des Règles est du texte
+libre, sans effet sur l'affichage.
+
+> L'objectif d'eau et le **nom** de l'habitude sont deux choses distinctes :
+> passer l'objectif à 2 L ne renomme pas la ligne « Eau (3L) ». Le nom se
+> change dans l'éditeur de liste.
+
 ## Les gestes de l'écran d'accueil
 
 - **Taper une ligne** : coche la case, ou ajoute une unité à un compteur
   (eau, prises, grease the groove, protocole).
-- **Taper le compteur** — le petit pavé « 2/3 » à droite — **retire une
-  unité**. C'est le moyen de revenir en arrière sur l'eau, les prises et le
+- L'**eau se compte par quarts de litre** : quatre taps par litre, soit douze
+  taps pour un objectif de 3 L. Le compteur affiche `1¾/3 L`.
+- **Taper le compteur** — le petit pavé à droite — **retire une unité**. C'est le moyen de revenir en arrière sur l'eau, les prises et le
   grease the groove, sans ajouter le moindre bouton à l'écran.
 - **Appui long sur la ligne** : fait la même chose que taper le compteur,
   depuis n'importe où sur la ligne.
@@ -129,3 +149,13 @@ puis ouvrir `http://localhost:8765`.
   statistiques reprennent.
 - **Les jours où l'application n'est pas ouverte ne sont pas archivés.** Ils
   laissent un trou dans l'historique plutôt que d'inventer vingt ratés.
+- **La hauteur des lignes est calculée, pas figée.** `ui-liste.js` mesure la
+  place disponible, la divise par le nombre de lignes du jour et publie le
+  résultat dans la variable CSS `--h-ligne` ; les tailles de texte, la
+  pastille et le compteur en découlent. Douze habitudes donnent de grandes
+  lignes, trente des lignes serrées, sans jamais déborder ni laisser de vide.
+- **Le compteur ne disparaît jamais**, même quand le maximum vaut 1 — les
+  jours de stade, où le quota de grease the groove tombe à une seule série.
+- **Le stockage a une version** (`VERSION` dans `js/store.js`). Quand une
+  donnée nouvelle apparaît, on incrémente ce numéro et `consolider()` complète
+  les sauvegardes déjà présentes sur le téléphone, sans rien effacer.

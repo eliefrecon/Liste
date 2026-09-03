@@ -80,6 +80,10 @@ export const REGLES_PAR_DEFAUT = [
 3. Sujet blanc, sur le tableau aussi — une évaluation du même type (un ensemble d'exercices) : donner à Claude d'anciennes évaluations du prof sur d'anciens chapitres et lui demander d'en imaginer une nouvelle sur le chapitre actuel, ou chercher des évaluations sur ce chapitre sur internet. Ou bien un sujet blanc pour les évaluations de rédaction.`,
   },
   {
+    titre: 'Psy, zn, mucus, ergy, mg, prob, vitA, vitD, aker',
+    texte: `Deux prises distinctes dans la journée. Le psyllium se prend le matin ; tout le reste se prend le soir. La ligne se valide donc en deux taps : le premier pour la prise du matin, le second pour celle du soir. Le détail de chaque prise se modifie en haut de cet écran, dans les réglages.`,
+  },
+  {
     titre: 'Poser tel à 21h15',
     texte: `À 21h15 le téléphone doit être posé en train de recharger dans la salle. Seules actions possibles : noter des rappels, lancer une méditation, lancer Endel. Toute autre action = case à décocher.`,
   },
@@ -104,6 +108,19 @@ export const DUREES_PROTOCOLE = [
   { jours: null, libelle: 'Indéterminée', detail: "ne s'arrête jamais tout seul, à arrêter à la main" },
 ];
 
-// Exercices « grease the groove » selon la parité du jour du mois.
-export const GTG_IMPAIR = ['Tractions 10', 'Squat en force 5', 'Avant-bras 1 négative par bras'];
-export const GTG_PAIR   = ['Pompes 20', 'Pogo 100', 'Curl pronation 5'];
+// ---------------------------------------------------------------------------
+// Réglages structurés — la source de vérité unique pour trois contenus qui
+// s'affichent à la fois dans les Règles et sur l'écran Liste.
+// Ils se modifient dans l'écran Règles, en haut, dans des champs identifiés :
+// ce qui y est écrit apparaît tel quel sur les lignes concernées.
+// ---------------------------------------------------------------------------
+export const REGLAGES_PAR_DEFAUT = {
+  // Exercices « grease the groove », selon la parité du jour du mois.
+  gtgImpair: 'Tractions 10 · Squat en force 5 · Avant-bras 1 négative par bras',
+  gtgPair:   'Pompes 20 · Pogo 100 · Curl pronation 5',
+  // Les deux prises de médicaments.
+  medMatin: 'psyllium',
+  medSoir:  'zn, mucus, ergy, mg, prob, vitA, vitD, aker',
+  // Objectif d'eau, en litres. Chaque litre se coche en quatre quarts.
+  eauLitres: 3,
+};

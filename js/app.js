@@ -13,7 +13,6 @@ import {
   doitDeclencherGTG, repondreGTG, palierAtteint,
 } from './model.js';
 import { msAvantProchainReset, cleAujourdhui, estJourImpair } from './dates.js';
-import { GTG_IMPAIR, GTG_PAIR } from './defaults.js';
 import { $, montrer, surEntree, ecranCourant, fermerModale } from './ui-commun.js';
 import { initListe, rendreListe } from './ui-liste.js';
 import { initProgression, rendreProgression } from './ui-progression.js';
@@ -79,8 +78,9 @@ const overlay = () => $('#overlay-gtg');
 function verifierGTG() {
   if (!doitDeclencherGTG(etat, jour)) return;
   if (!overlay().hidden) return;               // déjà ouvert
-  const exos = (estJourImpair(jour.date) ? GTG_IMPAIR : GTG_PAIR).join(' · ');
-  $('#gtg-detail').textContent = exos;
+  // Les exercices affichés sont ceux écrits dans l'écran Règles.
+  $('#gtg-detail').textContent =
+    estJourImpair(jour.date) ? etat.reglages.gtgImpair : etat.reglages.gtgPair;
   $('#gtg-compte').textContent =
     `série ${(etat.jour.gtgSeries || 0) + 1} sur ${jour.quota}`;
   overlay().hidden = false;

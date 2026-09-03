@@ -2,21 +2,29 @@
 // ui-liste.js — l'écran d'accueil.
 //
 // Contrainte de design prioritaire : toutes les habitudes du jour tiennent sur
-// un seul écran, sans défilement. Les lignes sont donc élastiques : elles se
-// partagent la hauteur disponible. Une ligne qui porte une information
-// secondaire (« OpenClassrooms », les exercices du jour…) reçoit un peu plus
-// de place que les autres, sans que le total dépasse jamais l'écran.
+// un seul écran, sans défilement, et remplissent cet écran. Les lignes sont
+// donc élastiques : elles se partagent exactement la hauteur disponible.
+//
+// Le calibrage est automatique. On mesure la hauteur réellement disponible,
+// on la divise par le nombre de lignes (celles qui portent une information
+// secondaire comptent un peu plus), et on publie le résultat dans la variable
+// CSS --h-ligne. Les tailles de texte, la pastille et le compteur en
+// découlent : 12 habitudes donnent de grandes lignes confortables, 30 des
+// lignes serrées, sans jamais déborder ni laisser de vide.
 //
 // Les nœuds ne sont recréés que si la composition de la liste change ; sinon
 // on met à jour sur place, ce qui laisse les animations se dérouler.
 // ---------------------------------------------------------------------------
 
 import { $, el, vider } from './ui-commun.js';
-import { ratesDeLaSemaine } from './model.js';
+import { ratesDeLaSemaine, formatLitres } from './model.js';
 
 const DUREE_APPUI_LONG = 420; // ms
 
-let zone;          // #lignes
+// Une ligne avec note occupe une fois et demie la hauteur d'une ligne simple.
+const FACTEUR_NOTE = 1.5;
+
+let zone;           // #lignes
 let signature = ''; // composition actuelle de la liste affichée
 let api = null;
 
@@ -31,7 +39,7 @@ export function initListe(a) {
   zone.addEventListener('pointerdown', (e) => {
     const noeud = e.target.closest('.ligne');
     if (!noeud) return;
-    // Taper le compteur (« 2/3 ») retire une unité au lieu d'en ajouter une.
+    // Taper le compteur (« 1¾/3 ») retire une unité au lieu d'en ajouter une.
     // C'est le moyen de décocher l'eau, les prises et le grease the groove,
     // sans ajouter le moindre bouton : le compteur devient le bouton.
     const surCompteur = Boolean(e.target.closest('.cpt'));
@@ -63,6 +71,11 @@ export function initListe(a) {
   zone.addEventListener('pointercancel', annuler);
   // Empêche le menu contextuel iOS pendant l'appui long.
   zone.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // La hauteur disponible change avec la rotation ou l'apparition de la barre
+  // d'adresse : on recalibre.
+  window.addEventListener('resize', calibrer);
+  window.addEventListener('orientationchange', () => setTimeout(calibrer, 120));
 }
 
 export function rendreListe(etat, jour) {
@@ -92,10 +105,21 @@ export function rendreListe(etat, jour) {
     if (noeud) majLigne(noeud, ligne, jour);
   }
 
-  // Garde-fou : si la liste devient si longue qu'elle déborde malgré tout,
-  // on resserre encore. Aucune ligne ne doit être coupée en bas de l'écran.
-  zone.classList.remove('tres-dense');
-  if (zone.scrollHeight > zone.clientHeight + 1) zone.classList.add('tres-dense');
+  calibrer();
+}
+
+/**
+ * Publie la hauteur d'une ligne dans --h-ligne. Toutes les tailles de l'écran
+ * Liste en dépendent : la liste remplit l'écran quel que soit son nombre
+ * d'habitudes.
+ */
+function calibrer() {
+  const lignes = zone.children;
+  const dispo = zone.clientHeight;
+  if (!lignes.length || !dispo) return;
+  let unites = 0;
+  for (const l of lignes) unites += l.classList.contains('avec-note') ? FACTEUR_NOTE : 1;
+  zone.style.setProperty('--h-ligne', `${(dispo / unites).toFixed(2)}px`);
 }
 
 /** Échappe un nom d'habitude pour l'utiliser dans un sélecteur CSS. */
@@ -112,13 +136,26 @@ function creerLigne(ligne) {
   return el('button', { class: 'ligne', 'data-nom': ligne.nom, type: 'button' }, [puce, txt, cpt]);
 }
 
+/**
+ * Texte du compteur. Il s'affiche pour toutes les lignes qui en sont
+ * vraiment un — même quand le maximum vaut 1, par exemple les jours de stade
+ * où le quota de grease the groove tombe à une seule série. C'est
+ * l'information la plus importante de ces lignes, elle ne disparaît jamais.
+ */
+function texteCompteur(ligne) {
+  if (ligne.type === 'case') return '';
+  const v = Math.min(ligne.valeur, ligne.max);
+  if (ligne.type === 'eau') return `${formatLitres(v)}/${formatLitres(ligne.max)} L`;
+  return `${v}/${ligne.max}`;
+}
+
 function majLigne(noeud, ligne, jour) {
   const etaitFaite = noeud.dataset.faite === '1';
   noeud.dataset.faite = ligne.faite ? '1' : '0';
   noeud.classList.toggle('faite', ligne.faite);
 
-  // Le disque intérieur suit l'avancement du compteur : on voit d'un coup
-  // d'œil qu'il reste un verre d'eau à boire.
+  // Le pavé intérieur suit l'avancement du compteur : on voit d'un coup d'œil
+  // qu'il reste un quart de litre à boire.
   const part = ligne.max > 0 ? Math.min(ligne.valeur / ligne.max, 1) : 0;
   noeud.querySelector('.puce i').style.transform = `scale(${part.toFixed(3)})`;
 
@@ -126,9 +163,8 @@ function majLigne(noeud, ligne, jour) {
   note.textContent = ligne.note;
   noeud.classList.toggle('avec-note', Boolean(ligne.note));
 
-  // Compteur affiché seulement pour les lignes qui en sont vraiment un.
   const cpt = noeud.querySelector('.cpt');
-  cpt.textContent = ligne.max > 1 ? `${Math.min(ligne.valeur, ligne.max)}/${ligne.max}` : '';
+  cpt.textContent = texteCompteur(ligne);
   // Quota GTG bâti sur des heures non confirmées : petit point d'avertissement.
   cpt.classList.toggle('doute', ligne.type === 'gtg' && !jour.heures.confirmee);
 
@@ -137,6 +173,6 @@ function majLigne(noeud, ligne, jour) {
     noeud.classList.remove('eclat');
     void noeud.offsetWidth; // force le redémarrage de l'animation
     noeud.classList.add('eclat');
-    setTimeout(() => noeud.classList.remove('eclat'), 320);
+    setTimeout(() => noeud.classList.remove('eclat'), 340);
   }
 }

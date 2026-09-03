@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "liste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [".claude/serveur.mjs"],
+      "port": 8765
+    }
+  ]
+}
