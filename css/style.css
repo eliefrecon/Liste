@@ -39,6 +39,17 @@
   --bleu:        #58a6f0;
   --rouge:       #f2695c;
 
+  /* Zones sûres d'iOS, nommées une fois pour toutes. En application ajoutée à
+     l'écran d'accueil, la barre d'état recouvre le haut de l'écran et la barre
+     d'accueil le bas : rien d'important ne doit s'y trouver.
+     --bas-liste est volontairement plus court que --bas : la dernière habitude
+     peut mordre un peu sur la zone du bas sans que sa zone tactile en pâtisse,
+     et la liste récupère ainsi de la hauteur. */
+  --haut: env(safe-area-inset-top);
+  --bas: env(safe-area-inset-bottom);
+  --bas-liste: max(env(safe-area-inset-bottom) - 12px, 8px);
+  --respire: 6px;   /* pour que la première ligne ne colle pas à la barre */
+
   --rayon:  16px;
   --rayon-l: 22px;
   --duree: 240ms;
@@ -148,7 +159,7 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: calc(env(safe-area-inset-top) + 14px) 16px 14px;
+  padding: calc(var(--haut) + 14px) 16px 14px;
   border-bottom: 2px solid var(--filet);
   background: var(--fond-haut);
 }
@@ -187,13 +198,27 @@ button { cursor: pointer; }
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 18px);
+  padding: calc(var(--haut) + var(--respire)) 0 calc(var(--bas) + 18px);
+}
+
+/* Un cache opaque derrière la barre d'état. Sans lui, dès qu'on fait défiler
+   d'un pixel pour atteindre le bouton, les premières habitudes glissent sous
+   la barre — et iOS y applique son bandeau de verre flou, qui les rend
+   illisibles. Le cache est fixé à l'écran, le contenu défile derrière. */
+#ecran-liste::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--haut);
+  background: var(--fond);
+  z-index: 10;
+  pointer-events: none;
 }
 
 #lignes {
   --h-ligne: 32px;   /* valeur de départ, recalculée par ui-liste.js */
-  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste));
+  height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste));
   display: flex;
   flex-direction: column;
   padding: 0 10px;
@@ -352,10 +377,10 @@ button { cursor: pointer; }
   display: block;
   width: calc(100% - 20px);
   height: 56px;
-  /* Assez de marge pour que le bouton passe entièrement sous la ligne de
-     flottaison : il faut faire défiler d'un cheveu pour l'atteindre, tandis
-     que la dernière habitude, elle, reste visible sans défiler. */
-  margin: 40px 10px 0;
+  /* Juste assez pour que le bouton passe sous la ligne de flottaison : il
+     faut faire défiler d'un cheveu pour l'atteindre, tandis que la dernière
+     habitude, elle, reste visible sans défiler. */
+  margin: calc(var(--bas) + 8px) 10px 0;
   border-radius: var(--rayon);
   background: var(--accent);
   color: var(--sur-accent);
@@ -372,8 +397,8 @@ button { cursor: pointer; }
 /* Le dimanche de repos : récompense rare, écran soigné. On garde le bouton
    accessible sans défiler, il n'y a rien d'autre à voir. */
 #repos {
-  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 80px);
-  min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 80px);
+  min-height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
+  min-height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -422,7 +447,7 @@ body.repos #lignes { display: none; }
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 14px calc(env(safe-area-inset-bottom) + 44px);
+  padding: 0 14px calc(var(--bas) + 44px);
 }
 
 .bloc { padding: 22px 2px; border-bottom: 2px solid var(--filet); }
@@ -712,7 +737,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   gap: 24px;
-  padding: calc(env(safe-area-inset-top) + 28px) 26px calc(env(safe-area-inset-bottom) + 28px);
+  padding: calc(var(--haut) + 28px) 26px calc(var(--bas) + 28px);
   text-align: center;
   background: var(--fond);
 }
@@ -752,7 +777,7 @@ input[type="range"]::-moz-range-thumb {
 .feuille {
   background: var(--fond-haut);
   border-radius: 26px 26px 0 0;
-  padding: 24px 18px calc(env(safe-area-inset-bottom) + 22px);
+  padding: 24px 18px calc(var(--bas) + 22px);
   max-height: 86vh;
   overflow-y: auto;
   animation: glisse 260ms var(--courbe);
@@ -851,7 +876,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .aide {
-  padding: 0 14px calc(env(safe-area-inset-bottom) + 14px);
+  padding: 0 14px calc(var(--bas) + 14px);
   font-size: 12px;
   font-weight: 600;
   color: var(--attenue);

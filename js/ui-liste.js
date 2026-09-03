@@ -72,10 +72,14 @@ export function initListe(a) {
   // Empêche le menu contextuel iOS pendant l'appui long.
   zone.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  // La hauteur disponible change avec la rotation ou l'apparition de la barre
-  // d'adresse : on recalibre.
-  window.addEventListener('resize', calibrer);
-  window.addEventListener('orientationchange', () => setTimeout(calibrer, 120));
+  // La hauteur disponible peut changer après coup : rotation, barre d'adresse
+  // qui apparaît, hauteur d'écran connue tardivement au premier affichage.
+  // Un observateur recalibre à chaque fois que la zone change de taille, ce
+  // qui évite de garder des tailles de texte calculées sur une hauteur
+  // provisoire — et donc une liste au texte trop petit pour ses lignes.
+  if (window.ResizeObserver) new ResizeObserver(calibrer).observe(zone);
+  window.addEventListener('orientationchange', () => setTimeout(calibrer, 150));
+  window.addEventListener('load', calibrer);
 }
 
 export function rendreListe(etat, jour) {
