@@ -1,90 +1,60 @@
 /* ==========================================================================
-   style.css — direction artistique.
+   style.css — direction artistique : LE CARNET.
 
-   Identité : un vert franc, unique couleur de l'application, posé sur une
-   encre très sombre. Des formes pleines et rondes, des graisses lourdes, et
-   des boutons qui s'enfoncent quand on appuie — une épaisseur visible sous
-   chaque bouton, qui se compresse au toucher. Rien de puéril : la couleur
-   est sobre, la typographie est celle du système, et le second rang reste
-   fin et discret.
+   L'application est un cahier. Le fond n'est pas un vide sombre, c'est du
+   papier : un crème profond, légèrement jaune, avec son grain. Les habitudes
+   sont écrites dessus à l'encre bleu-noir, sur des réglures d'un bleu-violet
+   pâle, à droite d'un filet de marge rouge — un cahier français.
 
-   Contrainte n°1 : les habitudes du jour tiennent sur un seul écran ET le
-   remplissent. La hauteur d'une ligne est calculée par ui-liste.js et publiée
-   dans --h-ligne ; toutes les tailles de cet écran en découlent. 12 habitudes
-   donnent de grandes lignes, 30 des lignes serrées, sans jamais déborder.
+   Les coches se posent DANS la marge, comme les annotations d'une copie
+   corrigée, jamais sur le texte. Et elles se dessinent : une ligne qui se
+   coche en douze fois voit son trait avancer d'un douzième à chaque tap.
 
-   Seul le bouton « Progression » est autorisé à passer sous la ligne de
-   flottaison : la dernière habitude, elle, reste toujours visible.
+   Une seule identité, pas de variante sombre : un carnet ne change pas de
+   couleur la nuit. Le crème est volontairement profond plutôt qu'éclatant,
+   pour rester tenable le soir.
+
+   Contrainte n°1 inchangée : les habitudes du jour tiennent sur un seul écran
+   ET le remplissent. ui-liste.js mesure la place et publie la hauteur d'une
+   ligne dans --h-ligne ; toutes les tailles de cet écran en découlent.
    ========================================================================== */
 
 :root {
-  --fond:        #0b1013;   /* encre */
-  --fond-haut:   #111a1e;
-  --surface:     #152026;
-  --surface-2:   #1e2c33;
-  --ombre-btn:   #0a1417;   /* l'épaisseur sous les boutons neutres */
+  /* Le papier */
+  --papier:      #f3e6c4;   /* la page : crème franchement jaune */
+  --papier-2:    #ece0b6;   /* surfaces secondaires, champs, bandes */
+  --papier-3:    #e2d4a4;   /* creux, pistes de jauge */
+  --reliure:     #43331f;   /* le cuir de la reliure, en haut de l'écran */
 
-  --texte:       #eff5f3;
-  --attenue:     #8b9ba1;
-  --tres-attenue:#55666d;
-  --filet:       rgba(150, 200, 210, 0.15);
-  --filet-fort:  rgba(150, 200, 210, 0.32);
+  /* Les encres */
+  --encre:       #23304d;   /* bleu-noir : le texte */
+  --encre-douce: #5f6b83;   /* second rang */
+  --encre-pale:  #9d9784;   /* ce qui est fait : une encre passée, chaude */
+  --reglure:     rgba(94, 118, 176, 0.32);   /* les lignes du cahier */
+  --reglure-fort:rgba(94, 118, 176, 0.52);
+  --marge:       #c2483a;   /* le filet de marge, rouge */
+  --vert:        #2f7d4f;   /* l'encre verte : ce qui est validé */
+  --vert-clair:  rgba(47, 125, 79, 0.115);
+  --rouge:       #b03a2b;
+  --ombre:       rgba(35, 48, 77, 0.28);   /* l'ombre portée des boîtes */
 
-  --accent:      #4ecb71;   /* le vert : validation, action, identité */
-  --accent-vif:  #6fe08e;
-  --accent-sombre:#2b8f4c;  /* l'épaisseur sous les boutons verts */
-  --accent-doux: rgba(78, 203, 113, 0.15);
-  --sur-accent:  #06210f;   /* ce qui se pose sur le vert */
+  --serif: "Iowan Old Style", Charter, "Palatino Linotype", Palatino, Georgia, serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --bleu:        #58a6f0;
-  --rouge:       #f2695c;
-
-  /* Zones sûres d'iOS, nommées une fois pour toutes. En application ajoutée à
-     l'écran d'accueil, la barre d'état recouvre le haut de l'écran et la barre
-     d'accueil le bas : rien d'important ne doit s'y trouver.
-     --bas-liste est volontairement plus court que --bas : la dernière habitude
-     peut mordre un peu sur la zone du bas sans que sa zone tactile en pâtisse,
-     et la liste récupère ainsi de la hauteur. */
+  /* Zones sûres d'iOS, nommées une fois pour toutes. --bas-liste est plus
+     court que --bas : la dernière habitude peut mordre un peu sur la zone de
+     la barre d'accueil, la liste y gagne de la hauteur. */
   --haut: env(safe-area-inset-top);
   --bas: env(safe-area-inset-bottom);
   --bas-liste: max(env(safe-area-inset-bottom) - 12px, 8px);
-  --respire: 6px;   /* pour que la première ligne ne colle pas à la barre */
+  --respire: 5px;
 
-  --rayon:  16px;
-  --rayon-l: 22px;
+  --rayon: 5px;      /* le papier ne s'arrondit pas beaucoup */
+  --rayon-l: 8px;
   --duree: 240ms;
   --courbe: cubic-bezier(0.32, 0.72, 0, 1);
-  --rebond: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  color-scheme: dark;
-}
-
-/* Thème clair : mêmes rôles, valeurs inversées. L'application est surtout
-   consultée le soir, le sombre reste donc la référence. */
-@media (prefers-color-scheme: light) {
-  :root {
-    --fond:        #eef2ef;
-    --fond-haut:   #ffffff;
-    --surface:     #ffffff;
-    --surface-2:   #e2eae4;
-    --ombre-btn:   #c8d3cc;
-
-    --texte:       #0c1714;
-    --attenue:     #5b6c66;
-    --tres-attenue:#91a29b;
-    --filet:       rgba(12, 23, 20, 0.13);
-    --filet-fort:  rgba(12, 23, 20, 0.28);
-
-    --accent:      #23a75b;
-    --accent-vif:  #1b8c4a;
-    --accent-sombre:#14713a;
-    --accent-doux: rgba(35, 167, 91, 0.14);
-    --sur-accent:  #ffffff;
-
-    --bleu:        #2b6fc4;
-    --rouge:       #c8463a;
-    color-scheme: light;
-  }
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -97,18 +67,28 @@ html, body {
 }
 
 body {
-  background: var(--fond);
-  color: var(--texte);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--serif);
   font-size: 16px;
   line-height: 1.35;
-  -webkit-font-smoothing: antialiased;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.012em;
   /* L'utilisateur ne doit jamais pouvoir zoomer ou tirer la page par erreur. */
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
+}
+
+/* Le grain du papier, posé sur tout. Rien à télécharger : c'est un bruit SVG
+   inscrit dans la feuille de style, multiplié sur le crème. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
 }
 
 button, input, textarea, select {
@@ -128,7 +108,7 @@ button { cursor: pointer; }
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: var(--fond);
+  background: var(--papier);
   transform: translateX(100%);
   opacity: 0;
   visibility: hidden;
@@ -144,7 +124,6 @@ button { cursor: pointer; }
               opacity   var(--duree) var(--courbe),
               visibility 0s;
 }
-/* Écran resté « derrière » : il recule au lieu de simplement disparaître. */
 .ecran.gauche { transform: translateX(-18%); opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -152,40 +131,44 @@ button { cursor: pointer; }
 }
 
 /* --- En-tête des écrans secondaires --------------------------------------- */
-/* La barre d'état d'iOS recouvre le haut de l'écran en application ajoutée :
-   tout part donc de env(safe-area-inset-top), jamais d'une marge fixe. */
+/* La reliure : une bande de cuir sous la barre d'état d'iOS. Elle rend le
+   texte blanc de la barre lisible malgré le papier clair, et donne à
+   l'application son bord de couverture. */
 
 .entete {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: calc(var(--haut) + 14px) 16px 14px;
-  border-bottom: 2px solid var(--filet);
-  background: var(--fond-haut);
+  padding: calc(var(--haut) + 13px) 16px 12px;
+  background:
+    linear-gradient(var(--reliure), var(--reliure)) top / 100% var(--haut) no-repeat,
+    var(--papier-2);
+  border-bottom: 2px solid var(--marge);
+  box-shadow: 0 3px 0 -1px var(--reglure);
 }
 .entete h1 {
   margin: 0;
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 .entete .droite {
   margin-left: auto;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--attenue);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--encre-douce);
 }
 
 .retour {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  color: var(--accent);
-  font-size: 15.5px;
-  font-weight: 800;
+  gap: 3px;
+  color: var(--marge);
+  font-size: 16px;
+  font-weight: 600;
   padding: 6px 8px 6px 0;
 }
-.retour::before { content: "‹"; font-size: 26px; font-weight: 500; line-height: 0.7; }
+.retour::before { content: "‹"; font-size: 27px; font-weight: 400; line-height: 0.68; }
 
 /* ==========================================================================
    ÉCRAN LISTE
@@ -201,114 +184,106 @@ button { cursor: pointer; }
   padding: calc(var(--haut) + var(--respire)) 0 calc(var(--bas) + 18px);
 }
 
-/* Un cache opaque derrière la barre d'état. Sans lui, dès qu'on fait défiler
-   d'un pixel pour atteindre le bouton, les premières habitudes glissent sous
-   la barre — et iOS y applique son bandeau de verre flou, qui les rend
-   illisibles. Le cache est fixé à l'écran, le contenu défile derrière. */
+/* La reliure, fixée à l'écran. Sans elle, dès qu'on fait défiler d'un pixel
+   pour atteindre le bouton, les premières habitudes glissent sous la barre
+   d'état d'iOS, qui y applique son bandeau de verre. Le contenu défile
+   derrière ce bord de cuir. */
 #ecran-liste::before {
   content: "";
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--haut);
-  background: var(--fond);
+  background: var(--reliure);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
   z-index: 10;
   pointer-events: none;
 }
 
 #lignes {
-  --h-ligne: 32px;   /* valeur de départ, recalculée par ui-liste.js */
+  --h-ligne: 34px;   /* valeur de départ, recalculée par ui-liste.js */
+  position: relative;
   height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste));
   height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste));
   display: flex;
   flex-direction: column;
-  padding: 0 10px;
+  padding: 0 14px;
 }
+
+/* Le filet de marge. Les coches se posent à sa gauche, le texte commence à sa
+   droite : il ne touche jamais une lettre. */
+#lignes::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 60px;
+  border-left: 1.5px solid var(--marge);
+  opacity: 0.8;
+  pointer-events: none;
+}
+body.repos #lignes::after { display: none; }
 
 .ligne {
   flex: 1 1 0;
   min-height: 0;
   display: flex;
   align-items: center;
-  gap: clamp(9px, calc(var(--h-ligne) * 0.32), 16px);
-  padding: 0 10px;
+  padding: 0;
   text-align: left;
   position: relative;
-  overflow: hidden;   /* rien ne s'échappe, même un texte très long */
-  border-radius: 13px;
+  overflow: hidden;
   transition: background 200ms var(--courbe);
 }
-/* Une ligne cochée devient une bande pleine et son nom s'éteint : ce qui
-   reste à faire est ce qui est écrit en clair et en gras. L'œil trie les
-   vingt lignes sans les lire. */
-.ligne.faite { background: var(--accent-doux); }
-
+/* Les réglures du cahier : elles traversent la page de bord à bord, et le
+   filet de marge les croise, comme sur un vrai cahier. */
 .ligne + .ligne::before {
   content: "";
   position: absolute;
-  top: 0; left: 10px; right: 10px;
-  border-top: 1.5px solid var(--filet);
+  top: 0; left: 0; right: 0;
+  border-top: 1px solid var(--reglure);
 }
-/* Pas de filet au contact d'une bande colorée : le bloc se suffit. */
-.ligne.faite::before,
-.ligne.faite + .ligne::before { border-top-color: transparent; }
+/* Une ligne faite reçoit un lavis vert pâle et son nom s'éteint : ce qui
+   reste à faire est ce qui est écrit en pleine encre. */
+.ligne.faite { background: var(--vert-clair); }
 
 /* Une ligne qui porte une information secondaire reçoit une fois et demie la
    hauteur d'une ligne simple — ui-liste.js en tient compte au calibrage. */
 .ligne.avec-note { flex-grow: 1.5; }
 
-/* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
+/* Éclat bref au moment du cochage : l'encre qui prend sur le papier. */
 .ligne.eclat { animation: eclat 300ms ease-out; }
 @keyframes eclat {
-  from { background: rgba(78, 203, 113, 0.42); }
-  to   { background: var(--accent-doux); }
+  from { background: rgba(47, 125, 79, 0.34); }
+  to   { background: var(--vert-clair); }
 }
 
-/* La pastille : vide, partiellement remplie, ou pleine. */
-.puce {
-  position: relative;
-  flex: 0 0 auto;
-  width:  clamp(19px, calc(var(--h-ligne) * 0.62), 32px);
-  height: clamp(19px, calc(var(--h-ligne) * 0.62), 32px);
-  border-radius: 32%;
-  border: 2.5px solid var(--filet-fort);
+/* --- La marge et sa coche ------------------------------------------------- */
+
+.marque {
+  flex: 0 0 46px;
   display: grid;
   place-items: center;
-  transition: border-color 180ms var(--courbe);
 }
-/* Le pavé intérieur. Pour un compteur il grandit proportionnellement à
-   l'avancement (0,25 pour un quart de litre) : on voit sans lire. */
-.puce i {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 26%;
-  background: var(--accent);
-  transform: scale(0);
-  transition: transform 220ms var(--rebond);
+.coche {
+  display: block;
+  width: clamp(20px, calc(var(--h-ligne) * 0.66), 34px);
+  height: clamp(20px, calc(var(--h-ligne) * 0.66), 34px);
+  transform: rotate(-7deg);   /* une main, pas une machine */
+  overflow: visible;
 }
-/* Une pastille cochée reçoit la même épaisseur que les boutons : c'est le
-   trait qui donne son caractère à l'application, repris partout. */
-.ligne.faite .puce {
-  border-color: var(--accent);
-  box-shadow: 0 2.5px 0 var(--accent-sombre);
+/* Le trait fantôme n'apparaît que sur les lignes qui se cochent en plusieurs
+   fois : il montre où la plume ira. Une habitude ordinaire pas encore faite
+   laisse la marge vide, comme dans un cahier. */
+.coche .fantome {
+  stroke: rgba(35, 48, 77, 0.26);
+  stroke-dasharray: 2.5 4.5;   /* un pointillé : le guide, pas la marque */
 }
-.ligne.faite .puce i { animation: gonfle 300ms var(--rebond); }
-@keyframes gonfle { 0% { transform: scale(0.55); } 100% { transform: scale(1); } }
+.coche .trait {
+  stroke: var(--vert);
+  /* Le trait se dessine : c'est le décalage du pointillé qui l'avance. */
+  transition: stroke-dashoffset 320ms var(--courbe);
+}
 
-/* Le crochet, tracé en CSS, n'apparaît qu'une fois la pastille pleine. */
-.puce i::after {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 42%; height: 24%;
-  border-left: 2.6px solid var(--sur-accent);
-  border-bottom: 2.6px solid var(--sur-accent);
-  border-radius: 1px;
-  transform: translate(-50%, -68%) rotate(-45deg);
-  opacity: 0;
-  transition: opacity 110ms 100ms linear;
-}
-.ligne.faite .puce i::after { opacity: 1; }
+/* --- Le texte de la ligne ------------------------------------------------- */
 
 .txt {
   flex: 1 1 auto;
@@ -317,85 +292,75 @@ button { cursor: pointer; }
   flex-direction: column;
   justify-content: center;
   gap: 1px;
+  padding-left: 14px;   /* on écrit APRÈS le filet de marge, jamais dessus */
 }
 .nom {
-  font-size: clamp(13.5px, calc(var(--h-ligne) * 0.50), 21px);
-  font-weight: 700;
-  line-height: 1.14;
-  letter-spacing: -0.025em;
+  font-size: clamp(14px, calc(var(--h-ligne) * 0.53), 22px);
+  line-height: 1.12;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 200ms var(--courbe);
 }
 .note {
-  font-size: clamp(9.5px, calc(var(--h-ligne) * 0.305), 13.5px);
-  font-weight: 600;
-  color: var(--attenue);
+  font-size: clamp(10px, calc(var(--h-ligne) * 0.325), 14px);
+  font-style: italic;
+  color: var(--encre-douce);
   line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -0.005em;
 }
-.ligne.faite .nom { color: var(--attenue); }
-.ligne.faite .note { color: var(--tres-attenue); }
+.ligne.faite .nom { color: var(--encre-pale); }
+.ligne.faite .note { color: var(--encre-pale); }
 
-/* Le compteur est aussi un bouton : le taper retire une unité. Il en a donc
-   l'aspect. Il ne rétrécit jamais et ne disparaît jamais — même quand le
-   quota vaut 1, les jours de stade : c'est l'information de la ligne. */
+/* Le compteur est aussi un bouton : le taper retire une unité. Il a donc
+   l'aspect d'une petite boîte tracée en marge. Il ne disparaît jamais, même
+   quand le maximum vaut 1 — les jours de stade, par exemple. */
 .cpt {
   flex: 0 0 auto;
   white-space: nowrap;
-  padding: 3px 8px;
-  border-radius: 9px;
-  background: var(--surface);
-  border: 1.5px solid var(--filet);
-  font-size: clamp(10px, calc(var(--h-ligne) * 0.33), 14px);
-  font-weight: 800;
-  color: var(--attenue);
-  text-align: center;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+  margin-right: 10px;
+  padding: 2px 7px;
+  border: 1px solid var(--reglure-fort);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.28);
+  font-size: clamp(11px, calc(var(--h-ligne) * 0.36), 15px);
+  font-variant-numeric: oldstyle-nums;
+  color: var(--encre-douce);
+  line-height: 1.3;
 }
 .cpt:empty { display: none; }
-.ligne.faite .cpt {
-  background: transparent;
-  border-color: var(--accent-doux);
-  color: var(--accent);
-}
+.ligne.faite .cpt { color: var(--vert); border-color: rgba(47, 125, 79, 0.42); }
 .cpt.doute::after {
   /* Le quota repose sur des heures non confirmées : on le signale. */
-  content: "•";
-  color: var(--accent);
+  content: "?";
+  color: var(--marge);
   margin-left: 3px;
+  font-style: italic;
 }
 
 /* Le seul autre élément de l'écran d'accueil — et le seul autorisé à passer
    sous la ligne de flottaison. */
 #bascule {
   display: block;
-  width: calc(100% - 20px);
-  height: 56px;
-  /* Juste assez pour que le bouton passe sous la ligne de flottaison : il
-     faut faire défiler d'un cheveu pour l'atteindre, tandis que la dernière
-     habitude, elle, reste visible sans défiler. */
-  margin: calc(var(--bas) + 8px) 10px 0;
+  width: calc(100% - 28px);
+  height: 54px;
+  margin: calc(var(--bas) + 8px) 14px 0;
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  background: var(--accent);
-  color: var(--sur-accent);
-  box-shadow: 0 4px 0 var(--accent-sombre);
-  font-size: 13.5px;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  background: var(--papier-2);
+  color: var(--encre);
+  box-shadow: 3px 3px 0 var(--ombre);
+  font-size: 17px;
+  font-style: italic;
   transition: transform 90ms ease, box-shadow 90ms ease;
 }
-#bascule::after { content: "  ›"; font-weight: 600; }
-#bascule:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-sombre); }
+#bascule::after { content: " →"; font-style: normal; }
+#bascule:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
 
-/* Le dimanche de repos : récompense rare, écran soigné. On garde le bouton
-   accessible sans défiler, il n'y a rien d'autre à voir. */
+/* --- Le dimanche de repos : récompense rare, page soignée ------------------ */
+
 #repos {
   min-height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
   min-height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
@@ -403,39 +368,40 @@ button { cursor: pointer; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 22px;
-  padding: 0 32px;
+  gap: 24px;
+  padding: 0 34px;
   text-align: center;
 }
 body.repos #repos { display: flex; }
 body.repos #lignes { display: none; }
 
+/* Un cachet de cire. */
 #repos .sceau {
-  width: 74px; height: 74px;
-  border-radius: 26px;
-  background: var(--accent);
-  color: var(--sur-accent);
+  width: 82px; height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #d4604f, var(--marge) 62%, #93321f);
+  color: rgba(255, 240, 220, 0.88);
   display: grid; place-items: center;
-  font-size: 32px;
-  box-shadow: 0 5px 0 var(--accent-sombre);
-  animation: souffle 4.5s ease-in-out infinite;
+  font-size: 34px;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,.3), 3px 4px 0 var(--ombre);
+  animation: souffle 5s ease-in-out infinite;
 }
 @keyframes souffle {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(2deg) scale(1.03); }
 }
 #repos h2 {
   margin: 0;
-  font-size: 31px;
-  font-weight: 850;
-  letter-spacing: -0.04em;
-  line-height: 1.15;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
 }
 #repos p {
   margin: 0;
-  color: var(--attenue);
-  font-size: 14.5px;
-  font-weight: 600;
+  color: var(--encre-douce);
+  font-size: 15px;
+  font-style: italic;
   max-width: 20em;
 }
 
@@ -447,142 +413,140 @@ body.repos #lignes { display: none; }
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 14px calc(var(--bas) + 44px);
+  padding: 0 16px calc(var(--bas) + 44px);
 }
 
-.bloc { padding: 22px 2px; border-bottom: 2px solid var(--filet); }
+.bloc { padding: 20px 0; border-bottom: 1px solid var(--reglure); }
 .bloc:last-child { border-bottom: 0; }
+/* Les intitulés de section : de petites capitales à l'encre rouge, comme un
+   titre souligné dans un cahier. */
 .bloc > h2 {
-  margin: 0 0 13px;
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: 0.11em;
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--marge);
 }
 
 /* --- Heures hors de la maison : l'élément dominant de l'écran ------------- */
 
 #bloc-heures {
   margin-top: 16px;
-  padding: 20px 18px 18px;
-  border: 2px solid var(--filet);
-  border-radius: var(--rayon-l);
-  background: var(--surface);
+  padding: 18px 16px 16px;
+  border: 1.5px solid var(--encre);
+  border-radius: var(--rayon);
+  background: var(--papier-2);
+  box-shadow: 3px 3px 0 var(--ombre);
   text-align: center;
 }
 #bloc-heures > h2 { margin-bottom: 4px; }
 #heures-valeur {
-  font-size: 66px;
-  font-weight: 850;
-  letter-spacing: -0.06em;
+  font-size: 68px;
+  font-weight: 400;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: -0.03em;
   line-height: 1;
-  margin: 6px 0 8px;
+  margin: 6px 0 6px;
 }
 #heures-valeur small {
-  font-size: 27px;
-  font-weight: 700;
-  color: var(--attenue);
-  letter-spacing: -0.03em;
+  font-size: 28px;
+  font-style: italic;
+  color: var(--encre-douce);
 }
 #heures-etat {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--attenue);
-  min-height: 18px;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--encre-douce);
+  min-height: 19px;
 }
-#heures-etat.propose { color: var(--accent); }
+#heures-etat.propose { color: var(--marge); }
 
-.reglette { display: flex; align-items: center; gap: 12px; margin: 18px 0 16px; }
+.reglette { display: flex; align-items: center; gap: 12px; margin: 16px 0 14px; }
 .reglette button {
   flex: 0 0 auto;
-  width: 48px; height: 48px;
-  background: var(--surface-2);
-  border-radius: 16px;
-  box-shadow: 0 3px 0 var(--ombre-btn);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--texte);
+  width: 46px; height: 46px;
+  border: 1.5px solid var(--encre);
+  border-radius: var(--rayon);
+  background: var(--papier);
+  box-shadow: 2px 2px 0 var(--ombre);
+  font-size: 22px;
   transition: transform 90ms ease, box-shadow 90ms ease;
 }
-.reglette button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ombre-btn); }
+.reglette button:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ombre); }
 
 input[type="range"] {
   flex: 1 1 auto;
   -webkit-appearance: none;
   appearance: none;
-  height: 34px;
+  height: 30px;
   background: transparent;
 }
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 8px;
-  background: var(--surface-2);
-  border-radius: 8px;
+  height: 5px;
+  background: var(--papier-3);
+  border: 1px solid var(--reglure-fort);
+  border-radius: 4px;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 28px; height: 28px;
-  margin-top: -10px;
+  width: 26px; height: 26px;
+  margin-top: -11px;
   border-radius: 50%;
-  background: var(--accent);
-  border: 3px solid var(--surface);
-  box-shadow: 0 2px 0 var(--accent-sombre);
+  background: var(--marge);
+  border: 2px solid var(--papier);
+  box-shadow: 1px 2px 0 var(--ombre);
 }
-input[type="range"]::-moz-range-track { height: 8px; background: var(--surface-2); border-radius: 8px; }
+input[type="range"]::-moz-range-track {
+  height: 5px; background: var(--papier-3);
+  border: 1px solid var(--reglure-fort); border-radius: 4px;
+}
 input[type="range"]::-moz-range-thumb {
-  width: 24px; height: 24px; border: 3px solid var(--surface);
-  border-radius: 50%; background: var(--accent);
+  width: 22px; height: 22px; border: 2px solid var(--papier);
+  border-radius: 50%; background: var(--marge);
 }
 
-/* --- Boutons génériques : une épaisseur qui se compresse au toucher ------- */
+/* --- Boutons : des boîtes tracées, avec leur ombre portée ----------------- */
 
 .btn {
   display: block;
   width: 100%;
-  padding: 16px 14px;
-  background: var(--surface);
+  padding: 14px;
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  box-shadow: 0 4px 0 var(--ombre-btn);
-  font-size: 15.5px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  background: var(--papier-2);
+  box-shadow: 3px 3px 0 var(--ombre);
+  font-size: 16.5px;
   text-align: center;
-  transition: transform 90ms ease, box-shadow 90ms ease, background 140ms;
+  transition: transform 90ms ease, box-shadow 90ms ease;
 }
-.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ombre-btn); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
 .btn.plein {
-  background: var(--accent);
-  color: var(--sur-accent);
-  box-shadow: 0 4px 0 var(--accent-sombre);
-  font-weight: 850;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 14.5px;
+  background: var(--vert);
+  border-color: #1f5c39;
+  color: #f4ecd6;
+  font-weight: 600;
 }
-.btn.plein:active { box-shadow: 0 1px 0 var(--accent-sombre); }
 .btn.discret {
   background: transparent;
-  color: var(--attenue);
-  font-weight: 700;
+  border-style: dashed;
+  border-color: var(--reglure-fort);
+  color: var(--encre-douce);
   box-shadow: none;
-  border: 2px solid var(--filet);
+  font-style: italic;
 }
-.btn.discret:active { transform: none; background: var(--surface); }
-/* Un bouton inactif ne doit pas ressembler à un bouton plein délavé :
-   il redevient une simple mention posée. */
+.btn.discret:active { transform: none; background: var(--papier-2); }
 .btn:disabled {
   background: transparent;
-  color: var(--tres-attenue);
-  border: 2px solid var(--filet);
+  border: 1px dashed var(--reglure-fort);
+  color: var(--encre-pale);
   box-shadow: none;
   transform: none;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: -0.02em;
+  font-style: italic;
 }
 .btn-rang { display: flex; gap: 10px; }
 .btn-rang .btn { flex: 1 1 0; }
-.pile > * + * { margin-top: 14px; }
+.pile > * + * { margin-top: 13px; }
 
 /* --- Listes de l'écran progression ---------------------------------------- */
 
@@ -590,129 +554,133 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 0;
-  border-bottom: 1.5px solid var(--filet);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--reglure);
   width: 100%;
   text-align: left;
 }
 .item:last-child { border-bottom: 0; }
 .item .ptxt { flex: 1 1 auto; min-width: 0; }
-.item .ptitre { font-size: 16px; font-weight: 750; letter-spacing: -0.025em; }
-.item .psous { font-size: 12.5px; font-weight: 600; color: var(--attenue); margin-top: 3px; }
+.item .ptitre { font-size: 17px; }
+.item .psous { font-size: 13px; font-style: italic; color: var(--encre-douce); margin-top: 2px; }
 .item .paction {
   flex: 0 0 auto;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--sur-accent);
-  background: var(--accent);
-  padding: 8px 13px;
-  border-radius: 11px;
-  box-shadow: 0 3px 0 var(--accent-sombre);
+  font-size: 14px;
+  color: var(--encre);
+  background: var(--papier-2);
+  border: 1.5px solid var(--encre);
+  border-radius: var(--rayon);
+  padding: 6px 11px;
+  box-shadow: 2px 2px 0 var(--ombre);
   white-space: nowrap;
 }
-.item.fait .ptitre { color: var(--attenue); }
+.item.fait .ptitre { color: var(--encre-pale); }
 
 /* L'interrupteur « comme si j'étais allé au stade ». */
 .voyant {
   flex: 0 0 auto;
-  width: 54px; height: 32px;
-  border-radius: 17px;
-  background: var(--surface-2);
-  padding: 3px;
-  transition: background 180ms var(--courbe);
+  width: 52px; height: 30px;
+  border-radius: 15px;
+  border: 1.5px solid var(--reglure-fort);
+  background: var(--papier-3);
+  padding: 2px;
+  transition: background 180ms var(--courbe), border-color 180ms;
 }
 .voyant i {
   display: block;
-  width: 26px; height: 26px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  background: var(--tres-attenue);
-  transition: transform 220ms var(--rebond), background 180ms;
+  background: var(--papier);
+  border: 1px solid var(--reglure-fort);
+  transition: transform 220ms var(--courbe), background 180ms;
 }
-.interrupteur.actif .voyant { background: var(--accent-doux); }
-.interrupteur.actif .voyant i { transform: translateX(22px); background: var(--accent); }
-.interrupteur.actif .ptitre { color: var(--accent); }
+.interrupteur.actif .voyant { background: rgba(47,125,79,.24); border-color: var(--vert); }
+.interrupteur.actif .voyant i { transform: translateX(22px); background: var(--vert); border-color: var(--vert); }
+.interrupteur.actif .ptitre { color: var(--vert); }
 
-.vide { color: var(--tres-attenue); font-size: 13.5px; font-weight: 600; padding: 4px 0; }
+.vide { color: var(--encre-douce); font-size: 14px; font-style: italic; padding: 4px 0; }
 
 .etiq {
   display: inline-block;
-  padding: 4px 9px;
-  border-radius: 8px;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  background: var(--accent-doux);
-  color: var(--accent);
+  padding: 3px 8px;
+  border: 1px solid var(--marge);
+  border-radius: 3px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--marge);
 }
 
 /* --- Statistiques --------------------------------------------------------- */
 
-.chiffres { display: flex; gap: 9px; }
+.chiffres { display: flex; gap: 10px; }
 .chiffre {
   flex: 1 1 0;
-  background: var(--surface);
+  background: var(--papier-2);
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  box-shadow: 0 3px 0 var(--ombre-btn);
-  padding: 15px 8px 13px;
+  box-shadow: 2px 2px 0 var(--ombre);
+  padding: 13px 6px 11px;
   text-align: center;
 }
 .chiffre b {
   display: block;
   font-size: 34px;
-  font-weight: 850;
-  letter-spacing: -0.05em;
+  font-weight: 400;
+  font-variant-numeric: oldstyle-nums;
   line-height: 1;
 }
 .chiffre span {
   display: block;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--attenue);
-  margin-top: 7px;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+  margin-top: 6px;
 }
-.chiffre.bien b { color: var(--accent); }
-.chiffre.alerte b { color: var(--rouge); }
+.chiffre.bien b { color: var(--vert); }
+.chiffre.alerte b { color: var(--marge); }
 
-#regle-dimanche { font-weight: 600; color: var(--attenue); }
+#regle-dimanche { font-style: italic; color: var(--encre-douce); }
 
 .graph {
   height: 180px;
-  padding: 12px 10px 6px;
-  background: var(--surface);
+  padding: 10px 8px 4px;
+  background: var(--papier-2);
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  box-shadow: 0 3px 0 var(--ombre-btn);
+  box-shadow: 2px 2px 0 var(--ombre);
   position: relative;
 }
 
-/* Barres horizontales du taux par habitude — en HTML pur, plus lisible qu'un
-   graphique et toujours affiché même si le CDN est injoignable. */
-.barre { padding: 10px 0 11px; border-bottom: 1.5px solid var(--filet); }
+/* Le taux par habitude : des barres tracées à la règle. */
+.barre { padding: 9px 0 10px; border-bottom: 1px solid var(--reglure); }
 .barre:last-child { border-bottom: 0; }
 .barre .haut { display: flex; align-items: baseline; gap: 8px; }
 .barre .haut b {
   flex: 1 1 auto;
-  font-size: 15px;
-  font-weight: 750;
-  letter-spacing: -0.025em;
+  font-size: 16px;
+  font-weight: 400;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.barre .haut span { flex: 0 0 auto; color: var(--attenue); font-size: 12.5px; font-weight: 750; }
+.barre .haut span {
+  flex: 0 0 auto; color: var(--encre-douce); font-size: 13px;
+  font-variant-numeric: oldstyle-nums;
+}
 .barre .piste {
-  height: 9px;
-  background: var(--surface-2);
-  border-radius: 9px;
-  margin-top: 9px;
+  height: 8px;
+  background: var(--papier-3);
+  border: 1px solid var(--reglure-fort);
+  border-radius: 2px;
+  margin-top: 7px;
   overflow: hidden;
 }
 .barre .jauge {
   height: 100%;
-  background: var(--accent);
-  border-radius: 9px;
+  background: var(--vert);
   transition: width 400ms var(--courbe);
 }
-.barre.faible .jauge { background: var(--rouge); }
-.barre.faible .haut span { color: var(--rouge); }
-.barre.forte  .haut span { color: var(--accent); }
+.barre.faible .jauge { background: var(--marge); }
+.barre.faible .haut span { color: var(--marge); }
+.barre.forte  .haut span { color: var(--vert); }
 
 /* ==========================================================================
    OVERLAYS
@@ -724,95 +692,102 @@ input[type="range"]::-moz-range-thumb {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  background: rgba(5, 9, 11, 0.9);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  background: rgba(67, 51, 31, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   animation: apparait 180ms ease-out;
 }
 .overlay[hidden] { display: none; }
 @keyframes apparait { from { opacity: 0; } to { opacity: 1; } }
 
-/* L'overlay GTG : franc, plein écran, sans échappatoire. */
+/* L'overlay GTG : une page entière, franche, sans échappatoire. */
+/* L'overlay occupe tout l'écran, y compris sous la barre d'état : il lui faut
+   sa propre bande de reliure, sinon le texte blanc de l'heure se retrouve sur
+   du papier clair et devient illisible. */
+#overlay-gtg::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: var(--haut);
+  background: var(--reliure);
+}
 #overlay-gtg {
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  padding: calc(var(--haut) + 28px) 26px calc(var(--bas) + 28px);
+  gap: 22px;
+  padding: calc(var(--haut) + 28px) 28px calc(var(--bas) + 28px);
   text-align: center;
-  background: var(--fond);
+  background: var(--papier);
 }
 #overlay-gtg h2 {
   margin: 0;
-  font-size: 48px;
-  font-weight: 850;
-  letter-spacing: -0.055em;
-  line-height: 1;
-  animation: monte 300ms var(--rebond);
+  font-size: 46px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  animation: monte 320ms var(--courbe);
 }
-@keyframes monte { from { opacity: 0; transform: translateY(16px) scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes monte { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 #gtg-detail {
-  color: var(--attenue);
-  font-size: 15px;
-  font-weight: 700;
-  margin: -10px 0 0;
+  color: var(--encre-douce);
+  font-size: 16px;
+  font-style: italic;
+  margin: -6px 0 0;
   max-width: 20em;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 #gtg-compte {
-  color: var(--sur-accent);
-  background: var(--accent);
-  font-size: 12.5px;
-  font-weight: 850;
-  letter-spacing: 0.12em;
+  color: var(--marge);
+  font-size: 13px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  padding: 7px 14px;
-  border-radius: 11px;
-  box-shadow: 0 3px 0 var(--accent-sombre);
+  padding-bottom: 5px;
+  border-bottom: 1.5px solid var(--marge);
 }
-#overlay-gtg .boutons { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; }
-#overlay-gtg .btn { padding: 19px; font-size: 16px; border-radius: var(--rayon-l); }
+#overlay-gtg .boutons { display: flex; flex-direction: column; gap: 13px; width: 100%; max-width: 310px; }
+#overlay-gtg .btn { padding: 18px; font-size: 18px; }
 
-/* Modale générique (protocole, import, confirmation). */
+/* Modale : une fiche glissée par le bas. */
 #modale { justify-content: flex-end; }
 .feuille {
-  background: var(--fond-haut);
-  border-radius: 26px 26px 0 0;
-  padding: 24px 18px calc(var(--bas) + 22px);
+  background: var(--papier);
+  border-top: 2px solid var(--marge);
+  border-radius: 10px 10px 0 0;
+  padding: 22px 18px calc(var(--bas) + 20px);
   max-height: 86vh;
   overflow-y: auto;
   animation: glisse 260ms var(--courbe);
 }
 @keyframes glisse { from { transform: translateY(100%); } to { transform: none; } }
-.feuille h2 { margin: 0 0 6px; font-size: 23px; font-weight: 850; letter-spacing: -0.035em; }
-.feuille p.intro { margin: 0 0 18px; color: var(--attenue); font-size: 13.5px; font-weight: 600; }
+.feuille h2 { margin: 0 0 5px; font-size: 25px; font-weight: 600; letter-spacing: -0.015em; }
+.feuille p.intro { margin: 0 0 17px; color: var(--encre-douce); font-size: 14.5px; font-style: italic; }
 
 .champ {
   width: 100%;
-  padding: 14px;
-  border: 2px solid var(--filet);
+  padding: 12px 13px;
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  background: var(--surface);
-  font-size: 16px;   /* 16 px minimum : en dessous, iOS zoome à la saisie */
-  font-weight: 650;
+  background: rgba(255, 255, 255, 0.42);
+  font-family: var(--serif);
+  font-size: 16.5px;   /* 16 px minimum : en dessous, iOS zoome à la saisie */
   -webkit-user-select: text;
   user-select: text;
 }
-.champ:focus { outline: none; border-color: var(--accent); }
+.champ:focus { outline: none; border-color: var(--marge); }
 
 .choix {
   display: flex;
   align-items: baseline;
   gap: 10px;
   width: 100%;
-  padding: 15px 6px;
-  border-bottom: 1.5px solid var(--filet);
-  border-radius: 12px;
+  padding: 13px 4px;
+  border-bottom: 1px solid var(--reglure);
   text-align: left;
 }
 .choix:last-of-type { border-bottom: 0; }
-.choix b { flex: 0 0 108px; font-size: 16.5px; font-weight: 800; letter-spacing: -0.025em; }
-.choix span { flex: 1 1 auto; font-size: 12.5px; font-weight: 600; color: var(--attenue); line-height: 1.3; }
-.choix:active { background: var(--accent-doux); }
+.choix b { flex: 0 0 108px; font-size: 18px; font-weight: 600; }
+.choix span { flex: 1 1 auto; font-size: 13.5px; font-style: italic; color: var(--encre-douce); line-height: 1.35; }
+.choix:active { background: var(--vert-clair); }
 
 /* ==========================================================================
    ÉDITEUR DE LISTE
@@ -821,22 +796,18 @@ input[type="range"]::-moz-range-thumb {
 #zone-edition {
   flex: 1 1 auto;
   position: relative;
-  margin: 12px;
+  margin: 14px;
   min-height: 0;
 }
-/* La coloration est un calque affiché derrière une zone de texte transparente,
-   parfaitement superposée. Les deux doivent partager exactement la même
-   typographie et les mêmes marges. */
 #coloration, #edition {
   position: absolute;
   inset: 0;
   margin: 0;
-  padding: 14px;
-  border: 2px solid var(--filet);
+  padding: 13px;
+  border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--mono);
   font-size: 14px;
-  font-weight: 500;
   line-height: 1.66;
   letter-spacing: 0;
   white-space: pre-wrap;
@@ -845,10 +816,15 @@ input[type="range"]::-moz-range-thumb {
   overflow-y: auto;
   tab-size: 2;
 }
-#coloration { color: var(--texte); pointer-events: none; background: var(--surface); }
+#coloration {
+  color: var(--encre);
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 3px 3px 0 var(--ombre);
+}
 #edition {
   color: transparent;
-  caret-color: var(--accent);
+  caret-color: var(--marge);
   background: transparent;
   resize: none;
   -webkit-user-select: text;
@@ -856,91 +832,76 @@ input[type="range"]::-moz-range-thumb {
 }
 #edition:focus { outline: none; }
 #coloration b.m {
-  color: var(--rouge);
-  background: rgba(242, 105, 92, 0.16);
-  border-radius: 5px;
-  font-weight: 700;
+  color: var(--marge);
+  background: rgba(194, 72, 58, 0.14);
+  border-radius: 3px;
+  font-weight: 600;
 }
 #coloration b.w {
-  color: var(--bleu);
-  background: rgba(88, 166, 240, 0.18);
-  border-radius: 5px;
+  color: #2a5ca8;
+  background: rgba(42, 92, 168, 0.14);
+  border-radius: 3px;
   padding: 0 2px;
-  font-weight: 800;
+  font-weight: 600;
 }
 #coloration span.err {
   display: inline-block;
   width: 100%;
-  text-decoration: underline wavy var(--rouge);
+  text-decoration: underline wavy var(--marge);
   text-underline-offset: 4px;
 }
 
 .aide {
-  padding: 0 14px calc(var(--bas) + 14px);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--attenue);
+  padding: 0 16px calc(var(--bas) + 14px);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--encre-douce);
   line-height: 1.5;
 }
-.aide code {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  color: var(--texte);
-  font-weight: 700;
-}
-#etat-edition { color: var(--rouge); font-weight: 750; min-height: 16px; display: block; margin-top: 5px; }
+.aide code { font-family: var(--mono); font-size: 12px; font-style: normal; color: var(--encre); }
+#etat-edition { color: var(--encre-pale); min-height: 17px; display: block; margin-top: 5px; }
+#etat-edition.erreur { color: var(--marge); }
 
 /* ==========================================================================
    ÉCRAN RÈGLES
    ========================================================================== */
 
-/* Les champs structurés : ils pilotent l'écran Liste, on les voit comme tels. */
 .groupe {
-  background: var(--surface);
-  border-radius: var(--rayon-l);
-  box-shadow: 0 3px 0 var(--ombre-btn);
-  padding: 16px 15px 6px;
+  background: var(--papier-2);
+  border: 1.5px solid var(--encre);
+  border-radius: var(--rayon);
+  box-shadow: 3px 3px 0 var(--ombre);
+  padding: 15px 14px 5px;
   margin-bottom: 14px;
 }
-.groupe h3 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-.aide-groupe {
-  margin: 4px 0 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--attenue);
-}
+.groupe h3 { margin: 0; font-size: 19px; font-weight: 600; }
+.aide-groupe { margin: 3px 0 13px; font-size: 13px; font-style: italic; color: var(--encre-douce); }
 .ligne-champ { display: block; margin-bottom: 12px; }
 .ligne-champ .etiquette {
   display: block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
+  font-size: 11.5px;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 6px;
+  color: var(--marge);
+  margin-bottom: 5px;
 }
-.ligne-champ .champ { background: var(--fond); }
 .avec-unite { display: flex; align-items: center; gap: 10px; }
-.avec-unite .champ.court { width: 110px; text-align: center; }
-.avec-unite .unite { font-size: 14.5px; font-weight: 700; color: var(--attenue); }
+.avec-unite .champ.court { width: 106px; text-align: center; }
+.avec-unite .unite { font-size: 16px; font-style: italic; color: var(--encre-douce); }
 
-.regle { padding: 17px 0; border-bottom: 1.5px solid var(--filet); }
+.regle { padding: 16px 0; border-bottom: 1px solid var(--reglure); }
 .regle:last-child { border-bottom: 0; }
-.regle h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; letter-spacing: -0.03em; }
+.regle h3 { margin: 0 0 6px; font-size: 19px; font-weight: 600; }
 .regle textarea {
   width: 100%;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 7px 9px;
-  margin-left: -9px;
-  font-size: 14px;
-  font-weight: 550;
-  line-height: 1.55;
-  color: var(--attenue);
+  border: 1px dashed transparent;
+  border-radius: var(--rayon);
+  padding: 6px 8px;
+  margin-left: -8px;
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--encre-douce);
   background: transparent;
   resize: none;
   overflow: hidden;
@@ -950,7 +911,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .regle textarea:focus {
   outline: none;
-  color: var(--texte);
-  border-color: var(--accent);
-  background: var(--surface);
+  color: var(--encre);
+  border-color: var(--reglure-fort);
+  background: rgba(255, 255, 255, 0.4);
 }

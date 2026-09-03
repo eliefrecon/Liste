@@ -51,6 +51,38 @@ qu'elle se mette en cache. Ensuite elle fonctionne hors ligne.
 
 ---
 
+## La direction artistique : le carnet
+
+L'application est un cahier. Tout part de là.
+
+- **Le papier** (`--papier`) est un crème franchement jaune, avec son grain :
+  un bruit inscrit dans la feuille de style, multiplié par-dessus tout. Il n'y
+  a pas de thème sombre — un carnet ne change pas de couleur la nuit. Le crème
+  est volontairement profond plutôt qu'éclatant, pour rester tenable le soir.
+- **L'encre** (`--encre`) est un bleu-noir. Les **réglures** (`--reglure`) sont
+  d'un bleu-violet pâle, le **filet de marge** (`--marge`) est rouge : c'est un
+  cahier français.
+- **Les coches se posent dans la marge**, à gauche du filet, comme les
+  annotations d'une copie corrigée. Le texte commence après le filet, il ne le
+  touche jamais.
+- **La coche se dessine.** Une ligne qui se coche en douze fois voit son trait
+  avancer d'un douzième à chaque tap. Techniquement : un `<path>` SVG avec
+  `pathLength="100"`, dont on fait varier le `stroke-dashoffset` — le décalage
+  vaut alors directement un pourcentage. Un trait fantôme en pointillé montre
+  où la plume ira, et n'apparaît que sur les lignes qui se cochent en plusieurs
+  fois. Une habitude ordinaire pas encore faite laisse la marge vide.
+- **La reliure** est cette bande de cuir en haut de l'écran, sous la barre
+  d'état d'iOS. Elle a deux rôles : cacher les habitudes qui glissent dessous
+  quand on fait défiler, et rendre lisible le texte blanc de l'heure malgré le
+  papier clair.
+- **Les boîtes** (boutons, cartes, champs) sont tracées d'un filet d'encre avec
+  leur ombre portée, et s'enfoncent au toucher.
+- **Aucune police n'est téléchargée.** Iowan Old Style et Charter sont déjà
+  présentes sur iPhone ; l'application n'a aucune dépendance.
+
+Pour changer l'ensemble des couleurs, il suffit de modifier les variables en
+haut de `css/style.css`.
+
 ## Organisation des fichiers
 
 ```

@@ -81,8 +81,11 @@ function verifierGTG() {
   // Les exercices affichés sont ceux écrits dans l'écran Règles.
   $('#gtg-detail').textContent =
     estJourImpair(jour.date) ? etat.reglages.gtgImpair : etat.reglages.gtgPair;
+  // « série 3 sur 9 », ou « série 5 » tout court une fois le quota dépassé —
+  // « série 5 sur 1 » ne voudrait rien dire.
+  const n = (etat.jour.gtgSeries || 0) + 1;
   $('#gtg-compte').textContent =
-    `série ${(etat.jour.gtgSeries || 0) + 1} sur ${jour.quota}`;
+    n > jour.quota ? `série ${n}` : `série ${n} sur ${jour.quota}`;
   overlay().hidden = false;
 }
 

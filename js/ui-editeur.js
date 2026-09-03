@@ -55,7 +55,10 @@ function peindre() {
     .map((l, i) => ({ ...l, n: i + 1 }))
     .filter((l) => !l.vide && !l.valide);
 
-  $('#etat-edition').textContent = fautives.length
+  // Le rouge est réservé aux erreurs : le simple décompte reste discret.
+  const etat = $('#etat-edition');
+  etat.classList.toggle('erreur', fautives.length > 0);
+  etat.textContent = fautives.length
     ? `Ligne ${fautives.map((l) => l.n).join(', ')} : ${fautives[0].erreur}.`
     : `${habitudes.length} habitudes.`;
 }

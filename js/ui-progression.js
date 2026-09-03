@@ -287,9 +287,11 @@ function rendreGraphique(etat, jour) {
   $('#graph-30').hidden = false;
 
   const style = getComputedStyle(document.documentElement);
-  const accent = style.getPropertyValue('--accent').trim();
-  const attenue = style.getPropertyValue('--attenue').trim();
-  const filet = style.getPropertyValue('--filet').trim();
+  // Le graphique emprunte les encres du carnet : barres à l'encre verte,
+  // courbe à l'encre douce, quadrillage aux réglures.
+  const accent = style.getPropertyValue('--vert').trim();
+  const attenue = style.getPropertyValue('--encre-douce').trim();
+  const filet = style.getPropertyValue('--reglure').trim();
 
   const labels = donnees.map((d) => dateCourte(d.date));
   const cochees = donnees.map((d) => d.faites);
