@@ -137,9 +137,18 @@ function ajusterZonesSures() {
   const racine = document.documentElement;
   const declare = parseFloat(getComputedStyle(racine).getPropertyValue('--haut')) || 0;
   let haut = declare;
+
   if (enApplication() && declare < 20) {
-    haut = window.innerHeight >= 750 ? 48 : 22;   // encoche, ou écran ancien
+    // env() se tait. Reste à savoir si la barre d'état recouvre la page ou si
+    // le système l'a déjà mise de côté. La fenêtre le dit : quand elle fait la
+    // hauteur de l'écran, elle passe dessous et il faut réserver la place ;
+    // quand elle est plus courte, la place est déjà prise — en réserver
+    // encore la perdrait une seconde fois, en bas de la liste.
+    const ecran = (window.screen && window.screen.height) || 0;
+    const recouverte = ecran > 0 && ecran - window.innerHeight < 20;
+    haut = recouverte ? (window.innerHeight >= 750 ? 48 : 22) : 0;
   }
+
   racine.style.setProperty('--haut', `${haut}px`);
   return haut;
 }

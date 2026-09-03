@@ -47,7 +47,8 @@
      --haut au démarrage. En bas, rien n'est réservé. */
   --haut: env(safe-area-inset-top);   /* ui-liste.js corrige si iOS se tait */
   --bas: env(safe-area-inset-bottom);
-  --respire: 7px;   /* pour que la première ligne ne colle pas à la barre */
+  --respire: 14px;  /* le verre d'iOS déborde sous la barre d'état :
+                       la première ligne s'en écarte d'autant */
 
   --rayon: 5px;      /* le papier ne s'arrondit pas beaucoup */
   --rayon-l: 8px;
@@ -191,7 +192,7 @@ button { cursor: pointer; }
   content: "";
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: var(--haut);
+  height: calc(var(--haut) + var(--respire));
   background: var(--bandeau);
   z-index: 10;
   pointer-events: none;
