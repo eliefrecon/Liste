@@ -77,6 +77,9 @@ L'application est un cahier. Tout part de là.
   papier clair.
 - **Les boîtes** (boutons, cartes, champs) sont tracées d'un filet d'encre avec
   leur ombre portée, et s'enfoncent au toucher.
+- **L'icône** reprend le motif : une page réglée, son filet de marge rouge,
+  trois lignes d'écriture et les coches dans la marge — la dernière à moitié
+  tracée. Elle est dessinée par `outils/icone.py`, sans aucune bibliothèque.
 - **Aucune police n'est téléchargée.** Iowan Old Style et Charter sont déjà
   présentes sur iPhone ; l'application n'a aucune dépendance.
 
@@ -91,6 +94,9 @@ manifest.webmanifest    nom, icône et mode plein écran de l'application
 sw.js                   fonctionnement hors ligne
 css/style.css           toute la mise en forme
 icones/                 les icônes de l'écran d'accueil
+outils/icone.py         le script qui les dessine (page de cahier, marge
+                        rouge, coches dans la marge). python3 outils/icone.py
+                        les régénère.
 js/
   dates.js        la journée qui commence à 4h00, la parité des jours,
                   les jours de stade, les semaines
