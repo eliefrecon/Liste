@@ -132,9 +132,8 @@ button { cursor: pointer; }
 }
 
 /* --- En-tête des écrans secondaires --------------------------------------- */
-/* La reliure : une bande de cuir sous la barre d'état d'iOS. Elle rend le
-   texte blanc de la barre lisible malgré le papier clair, et donne à
-   l'application son bord de couverture. */
+/* L'en-tête réserve la zone sûre du haut. Sa hauteur suit --haut, que
+   ui-liste.js corrige au démarrage quand iOS ne la déclare pas. */
 
 .entete {
   display: flex;
@@ -703,8 +702,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* L'overlay GTG : une page entière, franche, sans échappatoire. */
 /* L'overlay occupe tout l'écran, y compris sous la barre d'état : il lui faut
-   sa propre bande de reliure, sinon le texte blanc de l'heure se retrouve sur
-   du papier clair et devient illisible. */
+   sa propre bande opaque, sinon les habitudes se voient au travers. */
 #overlay-gtg::before {
   content: "";
   position: absolute;
