@@ -77,7 +77,11 @@ export function initListe(a) {
   // Un observateur recalibre à chaque fois que la zone change de taille, ce
   // qui évite de garder des tailles de texte calculées sur une hauteur
   // provisoire — et donc une liste au texte trop petit pour ses lignes.
-  if (window.ResizeObserver) new ResizeObserver(calibrer).observe(zone);
+  // On observe l'écran, pas la liste : calibrer() fixe la hauteur de la liste,
+  // l'observer elle-même bouclerait indéfiniment. L'écran, lui, a toujours la
+  // taille de la fenêtre.
+  if (window.ResizeObserver) new ResizeObserver(calibrer).observe($('#ecran-liste'));
+  window.addEventListener('resize', calibrer);
   window.addEventListener('orientationchange', () => setTimeout(calibrer, 150));
   window.addEventListener('load', calibrer);
 }
@@ -112,18 +116,55 @@ export function rendreListe(etat, jour) {
   calibrer();
 }
 
+/** Vrai si la page tourne en application ajoutée à l'écran d'accueil. */
+function enApplication() {
+  return window.navigator.standalone === true
+    || window.matchMedia('(display-mode: standalone)').matches;
+}
+
 /**
- * Publie la hauteur d'une ligne dans --h-ligne. Toutes les tailles de l'écran
- * Liste en dépendent : la liste remplit l'écran quel que soit son nombre
- * d'habitudes.
+ * Détermine la place réellement disponible, et cesse de faire confiance à
+ * env(safe-area-inset-*).
+ *
+ * En application ajoutée, iOS pose un bandeau translucide en haut de l'écran,
+ * mais ne déclare pas toujours la zone sûre correspondante : env() peut
+ * renvoyer zéro, et les premières habitudes passent alors sous le bandeau.
+ * On réserve donc nous-même la hauteur d'une barre d'état quand env() se tait.
+ *
+ * En bas, rien à réserver : la liste descend jusqu'au bord de l'écran.
+ */
+function ajusterZonesSures() {
+  const racine = document.documentElement;
+  const declare = parseFloat(getComputedStyle(racine).getPropertyValue('--haut')) || 0;
+  let haut = declare;
+  if (enApplication() && declare < 20) {
+    haut = window.innerHeight >= 750 ? 48 : 22;   // encoche, ou écran ancien
+  }
+  racine.style.setProperty('--haut', `${haut}px`);
+  return haut;
+}
+
+/**
+ * Fixe la hauteur de la liste et publie la hauteur d'une ligne dans --h-ligne.
+ *
+ * La hauteur vient de window.innerHeight, la seule mesure fiable de ce qui est
+ * réellement visible — et non d'un calcul en dvh moins des zones sûres qui
+ * peuvent être mal déclarées. Toutes les tailles de l'écran Liste découlent
+ * ensuite de --h-ligne : la liste remplit l'écran quel que soit le nombre
+ * d'habitudes du jour.
  */
 function calibrer() {
+  const haut = ajusterZonesSures();
+  const respire = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--respire')) || 0;
+  const hauteur = Math.max(120, window.innerHeight - haut - respire);
+  zone.style.height = `${hauteur}px`;
+
   const lignes = zone.children;
-  const dispo = zone.clientHeight;
-  if (!lignes.length || !dispo) return;
+  if (!lignes.length) return;
   let unites = 0;
   for (const l of lignes) unites += l.classList.contains('avec-note') ? FACTEUR_NOTE : 1;
-  zone.style.setProperty('--h-ligne', `${(dispo / unites).toFixed(2)}px`);
+  zone.style.setProperty('--h-ligne', `${(hauteur / unites).toFixed(2)}px`);
 }
 
 /** Échappe un nom d'habitude pour l'utiliser dans un sélecteur CSS. */

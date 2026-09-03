@@ -24,7 +24,7 @@
   --papier:      #f3e6c4;   /* la page : crème franchement jaune */
   --papier-2:    #ece0b6;   /* surfaces secondaires, champs, bandes */
   --papier-3:    #e2d4a4;   /* creux, pistes de jauge */
-  --reliure:     #43331f;   /* le cuir de la reliure, en haut de l'écran */
+  --bandeau:     #ece0b6;   /* le haut de la page, sous la barre d'état */
 
   /* Les encres */
   --encre:       #23304d;   /* bleu-noir : le texte */
@@ -41,13 +41,13 @@
   --serif: "Iowan Old Style", Charter, "Palatino Linotype", Palatino, Georgia, serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Zones sûres d'iOS, nommées une fois pour toutes. --bas-liste est plus
-     court que --bas : la dernière habitude peut mordre un peu sur la zone de
-     la barre d'accueil, la liste y gagne de la hauteur. */
-  --haut: env(safe-area-inset-top);
+  /* Zones sûres d'iOS. En application ajoutée, iOS pose un bandeau
+     translucide en haut de l'écran mais ne déclare pas toujours la zone sûre
+     correspondante : ui-liste.js mesure donc la place lui-même et réécrit
+     --haut au démarrage. En bas, rien n'est réservé. */
+  --haut: env(safe-area-inset-top);   /* ui-liste.js corrige si iOS se tait */
   --bas: env(safe-area-inset-bottom);
-  --bas-liste: max(env(safe-area-inset-bottom) - 12px, 8px);
-  --respire: 5px;
+  --respire: 7px;   /* pour que la première ligne ne colle pas à la barre */
 
   --rayon: 5px;      /* le papier ne s'arrondit pas beaucoup */
   --rayon-l: 8px;
@@ -140,9 +140,7 @@ button { cursor: pointer; }
   align-items: center;
   gap: 12px;
   padding: calc(var(--haut) + 13px) 16px 12px;
-  background:
-    linear-gradient(var(--reliure), var(--reliure)) top / 100% var(--haut) no-repeat,
-    var(--papier-2);
+  background: var(--papier-2);
   border-bottom: 2px solid var(--marge);
   box-shadow: 0 3px 0 -1px var(--reglure);
 }
@@ -181,20 +179,20 @@ button { cursor: pointer; }
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: calc(var(--haut) + var(--respire)) 0 calc(var(--bas) + 18px);
+  padding: calc(var(--haut) + var(--respire)) 0 18px;
 }
 
-/* La reliure, fixée à l'écran. Sans elle, dès qu'on fait défiler d'un pixel
-   pour atteindre le bouton, les premières habitudes glissent sous la barre
-   d'état d'iOS, qui y applique son bandeau de verre. Le contenu défile
-   derrière ce bord de cuir. */
+/* Le haut de la page, fixé à l'écran, opaque. Sans lui, dès qu'on fait défiler
+   d'un pixel pour atteindre le bouton, les premières habitudes glissent sous
+   la barre d'état d'iOS, qui y applique son bandeau de verre. Il est de la
+   couleur du papier : iOS y écrit l'heure en noir, une bande sombre la
+   rendrait illisible. */
 #ecran-liste::before {
   content: "";
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--haut);
-  background: var(--reliure);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  background: var(--bandeau);
   z-index: 10;
   pointer-events: none;
 }
@@ -202,8 +200,10 @@ button { cursor: pointer; }
 #lignes {
   --h-ligne: 34px;   /* valeur de départ, recalculée par ui-liste.js */
   position: relative;
-  height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste));
-  height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste));
+  /* Hauteur de secours avant le premier calibrage : ui-liste.js la remplace
+     par une mesure de window.innerHeight, plus fiable que le dvh. */
+  height: calc(100vh - var(--haut) - var(--respire));
+  height: calc(100dvh - var(--haut) - var(--respire));
   display: flex;
   flex-direction: column;
   padding: 0 14px;
@@ -346,7 +346,7 @@ body.repos #lignes::after { display: none; }
   display: block;
   width: calc(100% - 28px);
   height: 54px;
-  margin: calc(var(--bas) + 8px) 14px 0;
+  margin: 26px 14px 0;
   border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
   background: var(--papier-2);
@@ -362,8 +362,8 @@ body.repos #lignes::after { display: none; }
 /* --- Le dimanche de repos : récompense rare, page soignée ------------------ */
 
 #repos {
-  min-height: calc(100vh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
-  min-height: calc(100dvh - var(--haut) - var(--respire) - var(--bas-liste) - 86px);
+  min-height: calc(100vh - var(--haut) - var(--respire) - 88px);
+  min-height: calc(100dvh - var(--haut) - var(--respire) - 88px);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -692,7 +692,7 @@ input[type="range"]::-moz-range-thumb {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  background: rgba(67, 51, 31, 0.55);
+  background: rgba(60, 48, 26, 0.5);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   animation: apparait 180ms ease-out;
@@ -709,7 +709,7 @@ input[type="range"]::-moz-range-thumb {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: var(--haut);
-  background: var(--reliure);
+  background: var(--bandeau);
 }
 #overlay-gtg {
   align-items: center;
