@@ -40,11 +40,14 @@ export function formatLitres(quarts) {
 
 /**
  * Détermine le comportement d'une ligne à partir de son nom :
- *  'eau'       compteur 0→3
+ *  'eau'       compteur en quarts de litre
  *  'prises'    deux prises distinctes (psyllium le matin, le reste le soir)
  *  'gtg'       compteur de séries, rempli par l'overlay
  *  'protocole' compteur d'étapes, une par matière en protocole
  *  'case'      simple case à cocher
+ *
+ * Un cinquième type, 'compteur', ne se devine pas au nom : il naît d'un « x3 »
+ * écrit dans l'éditeur de liste. construireJour() s'en charge.
  */
 export function typeHabitude(nom) {
   const n = sansAccent(nom);
@@ -222,11 +225,15 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
   const repos = jsem === 0 && ratesDeLaSemaine(etat, k) < 3;
 
   const lignes = habitudes.map((h) => {
-    const type = typeHabitude(h.nom);
+    let type = typeHabitude(h.nom);
+    // Un compteur écrit dans l'éditeur (« x3 ») transforme une case ordinaire
+    // en compteur. Les quatre lignes spéciales gardent leur comportement.
+    if (type === 'case' && h.compteur > 1) type = 'compteur';
     const max = type === 'eau' ? quartsEau
       : type === 'prises' ? 2
       : type === 'gtg' ? quota
       : type === 'protocole' ? protos.length
+      : type === 'compteur' ? h.compteur
       : 1;
     const valeur = type === 'gtg' ? (jour.gtgSeries || 0)
       : type === 'protocole' ? etapesFaites.length
@@ -347,7 +354,9 @@ export function taper(etat, ligne, jourCalcule) {
       j.gtgSeries = v + 1;
       return true;
     case 'eau':
-      // Un tap = un quart de litre. Le maximum dépend de l'objectif réglé.
+    case 'compteur':
+      // Un tap = un cran. Le maximum vient de l'objectif d'eau réglé dans les
+      // Règles, ou du « x3 » écrit dans l'éditeur de liste.
       if (v >= ligne.max) return false;
       j.cases[ligne.nom] = v + 1;
       return true;
@@ -384,6 +393,7 @@ export function retirerUn(etat, ligne, jourCalcule) {
       return true;
     case 'eau':
     case 'prises':
+    case 'compteur':
       if (v <= 0) return false;
       j.cases[ligne.nom] = v - 1;
       return true;

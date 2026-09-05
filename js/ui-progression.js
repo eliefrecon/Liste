@@ -294,13 +294,15 @@ function rendreGraphique(etat, jour) {
   const filet = style.getPropertyValue('--reglure').trim();
 
   const labels = donnees.map((d) => dateCourte(d.date));
-  const cochees = donnees.map((d) => d.faites);
+  // Le graphique montre le taux, pas le nombre de cases. Le dénominateur est le
+  // nombre d'habitudes réellement affichées ce jour-là : un jeudi, où plusieurs
+  // habitudes sont retirées, tout cocher donne bien 100 %. Deux journées de
+  // longueurs différentes deviennent ainsi comparables.
   const taux = donnees.map((d) => (d.taux === null ? null : Math.round(d.taux * 100)));
 
   if (graphique) {
     graphique.data.labels = labels;
-    graphique.data.datasets[0].data = cochees;
-    graphique.data.datasets[1].data = taux;
+    graphique.data.datasets[0].data = taux;
     graphique.update('none');
     return;
   }
@@ -309,10 +311,8 @@ function rendreGraphique(etat, jour) {
     data: {
       labels,
       datasets: [
-        { type: 'bar', data: cochees, backgroundColor: accent, borderRadius: 2,
-          barPercentage: 0.72, categoryPercentage: 0.9, yAxisID: 'y', order: 2 },
-        { type: 'line', data: taux, borderColor: attenue, borderWidth: 1.4,
-          pointRadius: 0, tension: 0.35, spanGaps: true, yAxisID: 'y1', order: 1 },
+        { type: 'bar', data: taux, backgroundColor: accent, borderRadius: 2,
+          barPercentage: 0.72, categoryPercentage: 0.9, yAxisID: 'y' },
       ],
     },
     options: {
@@ -324,9 +324,10 @@ function rendreGraphique(etat, jour) {
         tooltip: {
           displayColors: false,
           callbacks: {
-            label: (c) => (c.datasetIndex === 0
-              ? `${c.raw} cochée${c.raw > 1 ? 's' : ''} sur ${donnees[c.dataIndex].total}`
-              : `${c.raw}% de complétion`),
+            label: (c) => {
+              const d = donnees[c.dataIndex];
+              return `${c.raw} % — ${d.faites} cochée${d.faites > 1 ? 's' : ''} sur ${d.total}`;
+            },
           },
         },
       },
@@ -338,11 +339,10 @@ function rendreGraphique(etat, jour) {
             callback: (v, i) => (i % 6 === 0 || i === labels.length - 1 ? labels[i] : '') },
         },
         y: {
-          beginAtZero: true, grid: { color: filet }, border: { display: false },
-          ticks: { color: attenue, font: { size: 9 }, precision: 0, maxTicksLimit: 4 },
-        },
-        y1: {
-          display: false, min: 0, max: 100, position: 'right',
+          min: 0, max: 100,
+          grid: { color: filet }, border: { display: false },
+          ticks: { color: attenue, font: { size: 9 }, stepSize: 50,
+            callback: (v) => `${v} %` },
         },
       },
     },

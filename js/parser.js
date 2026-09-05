@@ -22,6 +22,10 @@ const RE_MARQUEUR = /\(\s*(évale|evale|stade|jeudi)\s*\)/gi;
 // « Poser tel à 21h15 » ne matche pas : il n'y a pas d'espace avant « 15 ».
 const RE_POIDS = /\s+(\d+)\s*$/;
 
+// Un compteur = « x3 » ou « ×3 » en fin de ligne, juste avant le poids.
+// L'habitude se coche alors en trois taps au lieu d'un seul.
+const RE_COMPTEUR = /\s+[x×]\s*(\d+)\s*$/i;
+
 /** Enlève les accents et passe en minuscules — pour comparer des marqueurs. */
 export function sansAccent(s) {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -32,7 +36,8 @@ export function sansAccent(s) {
  * Renvoie { vide, nom, marqueurs, poids, valide, erreur, brut }.
  */
 export function analyserLigne(brut) {
-  const res = { brut, vide: false, nom: '', marqueurs: [], poids: 0, valide: true, erreur: '' };
+  const res = { brut, vide: false, nom: '', marqueurs: [], poids: 0, compteur: 0,
+                valide: true, erreur: '' };
 
   if (!brut.trim()) {
     res.vide = true;
@@ -48,17 +53,24 @@ export function analyserLigne(brut) {
     reste = reste.slice(0, mPoids.index);
   }
 
-  // 2. Les marqueurs, où qu'ils soient. On les retire du texte au passage.
+  // 2. Le compteur, juste avant le poids.
+  const mCompteur = reste.match(RE_COMPTEUR);
+  if (mCompteur) {
+    res.compteur = Number(mCompteur[1]);
+    reste = reste.slice(0, mCompteur.index);
+  }
+
+  // 3. Les marqueurs, où qu'ils soient. On les retire du texte au passage.
   reste = reste.replace(RE_MARQUEUR, (_m, mot) => {
     const normalise = sansAccent(mot) === 'evale' ? 'évale' : sansAccent(mot);
     if (!res.marqueurs.includes(normalise)) res.marqueurs.push(normalise);
     return ' ';
   });
 
-  // 3. Ce qui reste est le nom.
+  // 4. Ce qui reste est le nom.
   res.nom = reste.trim().replace(/\s+/g, ' ');
 
-  // 4. Contrôles de syntaxe. On signale sans jamais bloquer la saisie.
+  // 5. Contrôles de syntaxe. On signale sans jamais bloquer la saisie.
   if (!res.nom) {
     res.valide = false;
     res.erreur = 'nom vide';
@@ -68,6 +80,9 @@ export function analyserLigne(brut) {
   } else if (res.poids > 2) {
     res.valide = false;
     res.erreur = 'le poids doit être 1 ou 2';
+  } else if (res.compteur === 1 || res.compteur > 99) {
+    res.valide = false;
+    res.erreur = 'le compteur doit aller de 2 à 99';
   }
 
   return res;
@@ -108,7 +123,8 @@ export function analyserListe(texte) {
   }
 
   const habitudes = lignes.filter((l) => !l.vide && l.valide)
-    .map((l) => ({ nom: l.nom, marqueurs: l.marqueurs, poids: l.poids }));
+    .map((l) => ({ nom: l.nom, marqueurs: l.marqueurs, poids: l.poids,
+                   compteur: l.compteur }));
 
   return { habitudes, lignes };
 }
@@ -128,8 +144,11 @@ export function colorer(texte) {
     const info = analyserLigne(brut);
     let html = echapper(brut);
 
-    // Poids en bleu (on le traite avant les marqueurs, il est en fin de ligne).
+    // Poids en bleu, puis compteur en vert : on part de la fin de la ligne,
+    // comme le fait l'analyse elle-même.
     html = html.replace(RE_POIDS, (m, n) => m.replace(n, `<b class="w">${n}</b>`));
+    html = html.replace(/(\s+[x×]\s*\d+\s*)(?=(<b class="w">)|\s*$)/i,
+      (m) => `<b class="c">${m}</b>`);
     // Marqueurs en rouge.
     html = html.replace(RE_MARQUEUR, (m) => `<b class="m">${m}</b>`);
 

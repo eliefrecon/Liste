@@ -71,10 +71,9 @@ L'application est un cahier. Tout part de là.
   vaut alors directement un pourcentage. Un trait fantôme en pointillé montre
   où la plume ira, et n'apparaît que sur les lignes qui se cochent en plusieurs
   fois. Une habitude ordinaire pas encore faite laisse la marge vide.
-- **La reliure** est cette bande de cuir en haut de l'écran, sous la barre
-  d'état d'iOS. Elle a deux rôles : cacher les habitudes qui glissent dessous
-  quand on fait défiler, et rendre lisible le texte blanc de l'heure malgré le
-  papier clair.
+- **La bande du haut**, sous la barre d'état d'iOS, est opaque et de la couleur
+  du papier : elle cache les habitudes qui glisseraient dessous quand on fait
+  défiler, sans assombrir l'heure qu'iOS y écrit en noir.
 - **Les boîtes** (boutons, cartes, champs) sont tracées d'un filet d'encre avec
   leur ombre portée, et s'enfoncent au toucher.
 - **L'icône** reprend le motif : une page réglée, son filet de marge rouge,
@@ -145,6 +144,12 @@ Ils ne sont écrits qu'à un seul endroit (`reglages` dans le stockage) : modifi
 un champ met la liste à jour immédiatement. Le reste des Règles est du texte
 libre, sans effet sur l'affichage.
 
+Chaque consigne a son **titre modifiable** et sa **croix de suppression** :
+renommer une habitude dans l'éditeur n'oblige donc pas à vivre avec un titre
+devenu faux. Une consigne dont le titre ne renvoie à aucune habitude de la
+liste porte le repère « sans habitude » — c'est généralement le reste d'une
+habitude supprimée.
+
 > L'objectif d'eau et le **nom** de l'habitude sont deux choses distinctes :
 > passer l'objectif à 2 L ne renomme pas la ligne « Eau (3L) ». Le nom se
 > change dans l'éditeur de liste.
@@ -155,6 +160,9 @@ libre, sans effet sur l'affichage.
   (eau, prises, grease the groove, protocole).
 - L'**eau se compte par quarts de litre** : quatre taps par litre, soit douze
   taps pour un objectif de 3 L. Le compteur affiche `1¾/3 L`.
+- **Un compteur se déclare dans l'éditeur** : ajouter `x3` en fin de ligne fait
+  une habitude qui se coche en trois taps. `Prières ✞ ✝︎ ☨ x3 2` se lit
+  « nom, compteur de 3, poids 2 ». Retirer le `x3` la ramène à une case simple.
 - **Taper le compteur** — le petit pavé à droite — **retire une unité**. C'est le moyen de revenir en arrière sur l'eau, les prises et le
   grease the groove, sans ajouter le moindre bouton à l'écran.
 - **Appui long sur la ligne** : fait la même chose que taper le compteur,
@@ -194,6 +202,15 @@ libre, sans effet sur l'affichage.
   lignes, trente des lignes serrées, sans jamais déborder ni laisser de vide.
 - **Le compteur ne disparaît jamais**, même quand le maximum vaut 1 — les
   jours de stade, où le quota de grease the groove tombe à une seule série.
+- **En application ajoutée, la barre d'état est toujours réservée** (47 px), que
+  `env(safe-area-inset-top)` la déclare ou non. Une version antérieure essayait
+  de deviner, en comparant la hauteur de l'écran à celle de la fenêtre : c'était
+  faux, cette différence pouvant venir du bas, et des habitudes se retrouvaient
+  inaccessibles sous le bandeau.
+- **Le graphique des 30 jours montre un taux, pas un nombre de cases.** Le
+  dénominateur est le nombre d'habitudes réellement affichées ce jour-là : un
+  jeudi, où plusieurs habitudes sont retirées, tout cocher donne bien 100 %.
+  Deux journées de longueurs différentes deviennent ainsi comparables.
 - **Le stockage a une version** (`VERSION` dans `js/store.js`). Quand une
   donnée nouvelle apparaît, on incrémente ce numéro et `consolider()` complète
   les sauvegardes déjà présentes sur le téléphone, sans rien effacer.

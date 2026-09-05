@@ -47,8 +47,8 @@
      --haut au démarrage. En bas, rien n'est réservé. */
   --haut: env(safe-area-inset-top);   /* ui-liste.js corrige si iOS se tait */
   --bas: env(safe-area-inset-bottom);
-  --respire: 14px;  /* le verre d'iOS déborde sous la barre d'état :
-                       la première ligne s'en écarte d'autant */
+  --respire: 9px;   /* le verre d’iOS déborde de quelques points sous la
+                       barre d’état : la première ligne s’en écarte */
 
   --rayon: 5px;      /* le papier ne s'arrondit pas beaucoup */
   --rayon-l: 8px;
@@ -843,6 +843,12 @@ input[type="range"]::-moz-range-thumb {
   padding: 0 2px;
   font-weight: 600;
 }
+#coloration b.c {
+  color: var(--vert);
+  background: rgba(47, 125, 79, 0.15);
+  border-radius: 3px;
+  font-weight: 600;
+}
 #coloration span.err {
   display: inline-block;
   width: 100%;
@@ -890,7 +896,51 @@ input[type="range"]::-moz-range-thumb {
 
 .regle { padding: 16px 0; border-bottom: 1px solid var(--reglure); }
 .regle:last-child { border-bottom: 0; }
-.regle h3 { margin: 0 0 6px; font-size: 19px; font-weight: 600; }
+.entete-regle { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.titre-regle {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--encre);
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: var(--rayon);
+  padding: 3px 6px;
+  margin-left: -6px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.titre-regle:focus {
+  outline: none;
+  border-color: var(--reglure-fort);
+  background: rgba(255, 255, 255, 0.4);
+}
+.supprimer-regle {
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border: 1px solid var(--reglure-fort);
+  border-radius: var(--rayon);
+  color: var(--marge);
+  font-size: 15px;
+  line-height: 1;
+}
+.supprimer-regle:active { background: rgba(194, 72, 58, 0.14); }
+
+/* Une consigne dont le titre ne renvoie à aucune habitude de la liste :
+   reste probablement d'une habitude supprimée ou renommée. */
+.orpheline { display: none; }
+.est-orpheline .orpheline {
+  display: inline-block;
+  margin: 0 0 6px 0;
+  padding: 2px 7px;
+  border: 1px solid var(--marge);
+  border-radius: 3px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--marge);
+}
 .regle textarea {
   width: 100%;
   border: 1px dashed transparent;

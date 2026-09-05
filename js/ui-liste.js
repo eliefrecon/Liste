@@ -21,6 +21,10 @@ import { ratesDeLaSemaine, formatLitres } from './model.js';
 
 const DUREE_APPUI_LONG = 420; // ms
 
+// Hauteur de la barre d'état des iPhone à encoche, réservée quand iOS ne la
+// déclare pas lui-même.
+const HAUTEUR_BARRE = 47;
+
 // Une ligne avec note occupe une fois et demie la hauteur d'une ligne simple.
 const FACTEUR_NOTE = 1.5;
 
@@ -138,15 +142,17 @@ function ajusterZonesSures() {
   const declare = parseFloat(getComputedStyle(racine).getPropertyValue('--haut')) || 0;
   let haut = declare;
 
-  if (enApplication() && declare < 20) {
-    // env() se tait. Reste à savoir si la barre d'état recouvre la page ou si
-    // le système l'a déjà mise de côté. La fenêtre le dit : quand elle fait la
-    // hauteur de l'écran, elle passe dessous et il faut réserver la place ;
-    // quand elle est plus courte, la place est déjà prise — en réserver
-    // encore la perdrait une seconde fois, en bas de la liste.
-    const ecran = (window.screen && window.screen.height) || 0;
-    const recouverte = ecran > 0 && ecran - window.innerHeight < 20;
-    haut = recouverte ? (window.innerHeight >= 750 ? 48 : 22) : 0;
+  if (enApplication()) {
+    // En application ajoutée, la barre d'état d'iOS recouvre toujours le haut
+    // de la page. env() devrait le déclarer, mais se tait souvent : on réserve
+    // alors la hauteur nous-même.
+    //
+    // Une tentative précédente comparait la hauteur de l'écran à celle de la
+    // fenêtre pour deviner si la barre recouvrait la page. C'était faux : cette
+    // différence vient tout aussi bien de la zone du bas, et des habitudes se
+    // retrouvaient inaccessibles sous le bandeau. Mieux vaut réserver quelques
+    // points de trop que rendre une ligne impossible à cocher.
+    haut = Math.max(declare, window.innerHeight >= 750 ? HAUTEUR_BARRE : 22);
   }
 
   racine.style.setProperty('--haut', `${haut}px`);
