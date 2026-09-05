@@ -678,6 +678,22 @@ input[type="range"]::-moz-range-thumb {
   background: var(--vert);
   transition: width 400ms var(--courbe);
 }
+/* Les habitudes retirées de la liste, reléguées sous le classement. */
+.anciennes { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--reglure-fort); }
+.anciennes h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; color: var(--encre-douce); }
+.anciennes .barre .haut b { color: var(--encre-douce); }
+.oublier {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  margin-left: 2px;
+  border: 1px solid var(--reglure-fort);
+  border-radius: 3px;
+  color: var(--marge);
+  font-size: 13px;
+  line-height: 1;
+}
+.oublier:active { background: rgba(194, 72, 58, 0.14); }
+
 .barre.faible .jauge { background: var(--marge); }
 .barre.faible .haut span { color: var(--marge); }
 .barre.forte  .haut span { color: var(--vert); }

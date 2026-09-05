@@ -207,6 +207,12 @@ habitude supprimée.
   de deviner, en comparant la hauteur de l'écran à celle de la fenêtre : c'était
   faux, cette différence pouvant venir du bas, et des habitudes se retrouvaient
   inaccessibles sous le bandeau.
+- **Le classement par habitude ne montre que la liste actuelle.** C'est à quoi
+  il sert : décider quelles lignes garder. Les habitudes retirées de la liste
+  sont reléguées sous le classement, avec leur historique et une croix pour
+  l'effacer définitivement (`oublierHabitude` dans `js/model.js`). Cet oubli ne
+  recalcule pas les totaux journaliers : il ne doit pas réécrire le passé et
+  transformer après coup une journée ratée en journée parfaite.
 - **Le graphique des 30 jours montre un taux, pas un nombre de cases.** Le
   dénominateur est le nombre d'habitudes réellement affichées ce jour-là : un
   jeudi, où plusieurs habitudes sont retirées, tout cocher donne bien 100 %.

@@ -576,9 +576,33 @@ export function tauxParHabitude(etat, jours = 30, jourCalcule = null) {
     for (const nom of s.auto || []) ajouter(nom, true);
   }
 
+  // Une habitude retirée de la liste garde son historique — c'est ce qui lui
+  // permet de reprendre ses statistiques si elle revient. On la marque donc
+  // au lieu de l'écarter : l'écran Progression sépare les deux.
+  const actuelles = new Set(analyserListe(etat.liste).habitudes.map((h) => h.nom));
+
   return [...compte.values()]
-    .map((e) => ({ ...e, taux: e.total ? e.faites / e.total : 0 }))
+    .map((e) => ({ ...e, taux: e.total ? e.faites / e.total : 0,
+                   actuelle: actuelles.has(e.nom) }))
     .sort((a, b) => a.taux - b.taux || b.total - a.total);
+}
+
+/**
+ * Efface toute trace d'une habitude dans l'historique : elle disparaît des
+ * statistiques par habitude, et ne reviendra pas si on la réajoute plus tard.
+ *
+ * Les totaux journaliers (faites, total, ratés) ne sont volontairement pas
+ * recalculés : oublier une habitude ne doit pas réécrire le passé et
+ * transformer après coup une journée ratée en journée parfaite. Le graphique
+ * des 30 jours et les séries restent donc exactement ce qu'ils étaient.
+ */
+export function oublierHabitude(etat, nom) {
+  for (const snap of Object.values(etat.histoire)) {
+    for (const champ of ['affichees', 'cochees', 'bonus', 'auto']) {
+      if (Array.isArray(snap[champ])) snap[champ] = snap[champ].filter((n) => n !== nom);
+    }
+  }
+  delete etat.jour.cases[nom];
 }
 
 /** Vrai si la date est dans le futur par rapport au jour logique (garde-fou). */

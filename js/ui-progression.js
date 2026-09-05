@@ -11,7 +11,7 @@
 import { $, el, vider, montrer, ouvrirModale, fermerModale, confirmer, informer } from './ui-commun.js';
 import {
   formatHeures, confirmerHeures, lancerProtocole, arreterProtocole,
-  series, serie30jours, tauxParHabitude, ratesDeLaSemaine, taper,
+  series, serie30jours, tauxParHabitude, oublierHabitude, ratesDeLaSemaine, taper,
   protocolesActifs, SEUIL_COMME_STADE,
 } from './model.js';
 import { DUREES_PROTOCOLE } from './defaults.js';
@@ -357,17 +357,43 @@ function rendreTaux(etat, jour) {
     cible.append(el('div', { class: 'vide', text: 'Pas encore assez d’historique.' }));
     return;
   }
-  for (const l of lignes) {
-    const pct = Math.round(l.taux * 100);
-    const classe = pct < 40 ? 'faible' : pct >= 85 ? 'forte' : '';
-    cible.append(el('div', { class: `barre ${classe}`.trim() }, [
-      el('div', { class: 'haut' }, [
-        el('b', { text: l.nom }),
-        el('span', { text: `${pct}% · ${l.faites}/${l.total}` }),
-      ]),
-      el('div', { class: 'piste' }, [el('div', { class: 'jauge', style: `width:${pct}%` })]),
-    ]));
-  }
+
+  // Ce classement sert à décider quelles lignes garder : il ne montre donc que
+  // les habitudes de la liste actuelle. Celles qu'on en a retirées sont
+  // reléguées plus bas, avec de quoi les oublier pour de bon.
+  const actuelles = lignes.filter((l) => l.actuelle);
+  const anciennes = lignes.filter((l) => !l.actuelle);
+
+  for (const l of actuelles) cible.append(barreHabitude(l));
+
+  if (!anciennes.length) return;
+  cible.append(el('div', { class: 'anciennes' }, [
+    el('h3', { text: 'Retirées de la liste' }),
+    el('p', { class: 'vide', style: 'margin:-2px 0 8px',
+      text: 'Leur historique est gardé au cas où elles reviendraient. La croix l’efface définitivement.' }),
+    ...anciennes.map((l) => barreHabitude(l, async () => {
+      if (!await confirmer('Oublier cette habitude ?',
+        `L’historique de « ${l.nom} » sera effacé. Les taux des journées passées, eux, ne changent pas.`,
+        'Oublier')) return;
+      oublierHabitude(etat, l.nom);
+      api.apresAction();
+    })),
+  ]));
+}
+
+/** Une barre du classement. `oublier` ajoute la croix de suppression. */
+function barreHabitude(l, oublier) {
+  const pct = Math.round(l.taux * 100);
+  const classe = pct < 40 ? 'faible' : pct >= 85 ? 'forte' : '';
+  return el('div', { class: `barre ${classe}`.trim() }, [
+    el('div', { class: 'haut' }, [
+      el('b', { text: l.nom }),
+      el('span', { text: `${pct}% · ${l.faites}/${l.total}` }),
+      oublier ? el('button', { class: 'oublier', text: '✕',
+        'aria-label': 'Oublier cette habitude', onclick: oublier }) : null,
+    ]),
+    el('div', { class: 'piste' }, [el('div', { class: 'jauge', style: `width:${pct}%` })]),
+  ]);
 }
 
 // --- Export / import --------------------------------------------------------
