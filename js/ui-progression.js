@@ -15,7 +15,7 @@ import {
   protocolesActifs, SEUIL_COMME_STADE,
 } from './model.js';
 import { DUREES_PROTOCOLE } from './defaults.js';
-import { dateLisible, dateCourte, jourSemaine, nomJourSemaine, estJourDeStade } from './dates.js';
+import { dateLisible, dateCourte, jourSemaine, nomJourSemaine } from './dates.js';
 import { exporterJSON, importerJSON } from './store.js';
 
 let api = null;
@@ -97,9 +97,8 @@ function rendreHeures(etat, jour) {
 
 function rendreGTG(etat, jour) {
   const cible = $('#gtg-resume');
-  const vraiStade = estJourDeStade(jour.date);
   let motif;
-  if (vraiStade) motif = 'jour de stade : 1 série';
+  if (jour.stade) motif = jour.stadeDeclare ? 'jour de stade déclaré : 1 série' : 'jour de stade : 1 série';
   else if (etat.jour.commeStade) motif = 'compté comme un jour de stade : 1 série';
   else if (jour.heures.valeur >= 10) motif = `${formatHeures(jour.heures.valeur)} dehors, au moins 10 h : 2 séries`;
   else motif = `12 − ${Math.ceil(jour.heures.valeur)} h dehors`;
@@ -118,10 +117,31 @@ function rendreGTG(etat, jour) {
     ]),
   );
 
+  // Jour de stade. Mardi et jeudi le sont par défaut ; n'importe quelle journée
+  // peut être déclarée ou dédéclarée, pour ce jour-là seulement. Cela vaut pour
+  // le quota comme pour les habitudes marquées (stade).
+  const defaut = jour.stadeAuto ? 'mardi et jeudi par défaut' : 'pas un jour de stade par défaut';
+  cible.append(el('button', {
+    class: `item interrupteur${jour.stade ? ' actif' : ''}`,
+    onclick: () => {
+      // On inscrit l'inverse de l'état courant : reflipper revient au défaut.
+      etat.jour.stade = !jour.stade;
+      api.apresAction();
+    },
+  }, [
+    el('div', { class: 'ptxt' }, [
+      el('div', { class: 'ptitre', text: 'Jour de stade' }),
+      el('div', { class: 'psous',
+        text: `${defaut} · 1 seule série, et les habitudes (stade) sont retirées` }),
+    ]),
+    el('span', { class: 'voyant' }, [el('i')]),
+  ]));
+
   // Une journée passée dehors autant qu'un jour de stade donne droit au même
-  // quota d'une seule série. La case n'apparaît que si la question se pose,
-  // c'est-à-dire à partir de plusieurs heures passées hors de la maison.
-  const pertinent = !vraiStade
+  // quota d'une seule série, mais sans retirer d'habitude. La case n'apparaît
+  // que si la question se pose : hors jour de stade, et après plusieurs heures
+  // passées hors de la maison.
+  const pertinent = !jour.stade
     && (jour.heures.valeur >= SEUIL_COMME_STADE || etat.jour.commeStade);
   if (!pertinent) return;
 
@@ -131,7 +151,7 @@ function rendreGTG(etat, jour) {
   }, [
     el('div', { class: 'ptxt' }, [
       el('div', { class: 'ptitre', text: 'Comme si j’étais allé au stade' }),
-      el('div', { class: 'psous', text: 'autant de temps hors de la maison qu’un jour de stade : 1 seule série' }),
+      el('div', { class: 'psous', text: 'autant de temps dehors, mais les habitudes (stade) restent' }),
     ]),
     el('span', { class: 'voyant' }, [el('i')]),
   ]));

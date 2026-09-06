@@ -43,6 +43,9 @@ export function jourVierge(date = cleAujourdhui()) {
     heures: null,
     heuresOk: false,
     commeStade: false,   // « autant de temps à la maison qu'un jour de stade »
+    // null = on suit le calendrier (mardi et jeudi) ; true ou false = déclaré
+    // à la main pour aujourd'hui seulement.
+    stade: null,
   };
 }
 

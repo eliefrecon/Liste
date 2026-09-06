@@ -59,10 +59,19 @@ export function estJourImpair(k) {
   return numeroDuJour(k) % 2 === 1;
 }
 
-/** Vrai si c'est un jour de stade : mardi (2), jeudi (4) ou dimanche (0). */
+/**
+ * Vrai si c'est un jour de stade « par défaut » : mardi (2) ou jeudi (4).
+ *
+ * Le dimanche n'en fait plus partie : c'était un jour de stade pour le quota
+ * de grease the groove, mais pas pour le marqueur (stade), qui gardait ses
+ * habitudes affichées ce jour-là. Cette exception n'a plus lieu d'être.
+ *
+ * Cette valeur n'est qu'un défaut : la journée peut être déclarée autrement
+ * depuis l'écran Progression. Voir estStade() dans model.js.
+ */
 export function estJourDeStade(k) {
   const j = jourSemaine(k);
-  return j === 2 || j === 4 || j === 0;
+  return j === 2 || j === 4;
 }
 
 /** Lundi de la semaine contenant la clé donnée (semaine lundi → dimanche). */

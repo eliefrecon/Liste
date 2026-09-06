@@ -160,6 +160,21 @@ export function confirmerHeures(etat, valeur) {
 // --- Quota de grease the groove --------------------------------------------
 
 /**
+ * Jour de stade, en tenant compte d'une éventuelle déclaration manuelle.
+ *
+ * Mardi et jeudi le sont par défaut ; n'importe quelle journée peut être
+ * déclarée ou dédéclarée depuis l'écran Progression, pour ce jour-là
+ * seulement — la déclaration repart de zéro à la bascule de journée.
+ *
+ * Cette réponse vaut pour tout : le quota de grease the groove comme le
+ * marqueur (stade) qui masque des habitudes.
+ */
+export function estStade(k, jour) {
+  if (jour && jour.stade != null) return jour.stade;
+  return estJourDeStade(k);
+}
+
+/**
  * Nombre de séries à faire aujourd'hui, par ordre de priorité :
  *   1. jour de stade (mardi, jeudi, dimanche) → 1 série ;
  *   1 bis. journée déclarée « comme un jour de stade » → 1 série aussi.
@@ -169,7 +184,7 @@ export function confirmerHeures(etat, valeur) {
  *   3. sinon 12 − heures dehors arrondies à l'heure supérieure.
  */
 export function quotaGTG(etat, k, jour) {
-  if (estJourDeStade(k) || jour.commeStade) return 1;
+  if (estStade(k, jour) || jour.commeStade) return 1;
   const h = heuresRetenues(etat, k, jour).valeur;
   if (h >= 10) return 2;
   return 12 - Math.ceil(h);
@@ -190,8 +205,10 @@ function retraitsDe(habitude, ctx) {
   if (habitude.marqueurs.includes('évale') && ctx.protos.length) {
     out.push({ marqueur: 'évale', motif: 'protocole d’évaluation en cours' });
   }
-  if (habitude.marqueurs.includes('stade') && (ctx.jsem === 2 || ctx.jsem === 4)) {
-    out.push({ marqueur: 'stade', motif: ctx.jsem === 2 ? 'mardi, jour de stade' : 'jeudi, jour de stade' });
+  if (habitude.marqueurs.includes('stade') && ctx.stade) {
+    const motif = ctx.stadeDeclare ? 'jour de stade déclaré'
+      : ctx.jsem === 2 ? 'mardi, jour de stade' : 'jeudi, jour de stade';
+    out.push({ marqueur: 'stade', motif });
   }
   if (habitude.marqueurs.includes('jeudi') && ctx.jsem === 4) {
     out.push({ marqueur: 'jeudi', motif: 'jeudi' });
@@ -214,7 +231,9 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
   const heures = heuresRetenues(etat, k, jour);
   // Les réglages voyagent dans le contexte : exercices du jour, détail des
   // deux prises de médicaments, objectif d'eau.
-  const ctx = { k, jsem, impair, protos, quota, reglages: etat.reglages };
+  const stade = estStade(k, jour);
+  const ctx = { k, jsem, impair, protos, quota, reglages: etat.reglages,
+                stade, stadeDeclare: jour.stade != null };
   const quartsEau = quartsPourObjectif(etat.reglages);
 
   // Étapes de protocole : on ne compte que les matières encore actives.
@@ -277,6 +296,7 @@ export function construireJour(etat, k = cleAujourdhui(), jour = etat.jour) {
 
   return {
     date: k, jsem, impair, repos, protos, quota, heures,
+    stade, stadeAuto: estJourDeStade(k), stadeDeclare: jour.stade != null,
     lignes, visibles, retirees, bonus,
     faites,
     total: visibles.length,

@@ -174,6 +174,15 @@ habitude supprimée.
 
 - **La journée change à 4h00**, pas à minuit (`js/dates.js`). Ce qui est coché à
   2h du matin appartient encore à la veille.
+- **Les jours de stade sont le mardi et le jeudi** — plus le dimanche. Ce n'est
+  qu'un défaut : l'interrupteur « Jour de stade » de l'écran Progression permet
+  de déclarer n'importe quelle journée, ou d'annuler un mardi. La déclaration
+  ne vaut que pour la journée en cours et repart de zéro à 4h00. Elle vaut pour
+  tout : le quota de grease the groove comme le marqueur `(stade)` qui retire
+  des habitudes (`estStade` dans `js/model.js`).
+- **« Comme si j'étais allé au stade » est autre chose** : le quota tombe à 1
+  série, mais les habitudes `(stade)` restent affichées. C'est le cas d'une
+  journée passée dehors sans être allé au stade.
 - **L'overlay « Fais ton GTG » ne redemande jamais un palier déjà traité.**
   Décocher puis recocher une habitude ne le fait donc pas revenir : seul un
   nouveau multiple de 2 le déclenche (`gtgPalier` dans `js/model.js`).
