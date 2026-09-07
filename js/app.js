@@ -16,6 +16,7 @@ import { msAvantProchainReset, cleAujourdhui, estJourImpair } from './dates.js';
 import { $, montrer, surEntree, ecranCourant, fermerModale } from './ui-commun.js';
 import { initListe, rendreListe } from './ui-liste.js';
 import { initProgression, rendreProgression } from './ui-progression.js';
+import { initDetail, rendreDetail } from './ui-detail.js';
 import { initEditeur, rendreEditeur } from './ui-editeur.js';
 import { initRegles, rendreRegles } from './ui-regles.js';
 
@@ -30,6 +31,7 @@ function rendre() {
   rendreListe(etat, jour);
   switch (ecranCourant()) {
     case 'progression': rendreProgression(etat, jour); break;
+    case 'detail': rendreDetail(etat, jour); break;
     case 'editeur': rendreEditeur(etat); break;
     case 'regles': rendreRegles(etat); break;
   }
@@ -134,6 +136,7 @@ function demarrer() {
 
   initListe(api);
   initProgression(api);
+  initDetail(api);
   initEditeur(api);
   initRegles(api);
 
@@ -143,6 +146,7 @@ function demarrer() {
 
   // Chaque écran se dessine au moment où on y entre.
   surEntree('progression', () => rendreProgression(etat, jour));
+  surEntree('detail', () => rendreDetail(etat, jour));
   surEntree('editeur', () => rendreEditeur(etat));
   surEntree('regles', () => rendreRegles(etat));
   surEntree('liste', () => rendreListe(etat, jour));

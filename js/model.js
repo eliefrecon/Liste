@@ -9,7 +9,7 @@
 
 import {
   cleAujourdhui, jourSemaine, estJourImpair, estJourDeStade,
-  ajouterJours, lundiDeLaSemaine, cle, versDate,
+  ajouterJours, lundiDeLaSemaine, cle, versDate, nomJourSemaine,
 } from './dates.js';
 import { analyserListe, sansAccent } from './parser.js';
 import { jourVierge } from './store.js';
@@ -176,7 +176,7 @@ export function estStade(k, jour) {
 
 /**
  * Nombre de séries à faire aujourd'hui, par ordre de priorité :
- *   1. jour de stade (mardi, jeudi, dimanche) → 1 série ;
+ *   1. jour de stade (mardi et jeudi, ou déclaré à la main) → 1 série ;
  *   1 bis. journée déclarée « comme un jour de stade » → 1 série aussi.
  *      C'est le cas d'une journée passée dehors autant que si on était allé
  *      au stade : la case se coche à la main dans l'écran Progression ;
@@ -623,6 +623,98 @@ export function oublierHabitude(etat, nom) {
     }
   }
   delete etat.jour.cases[nom];
+}
+
+
+// --- Statistiques détaillées ------------------------------------------------
+
+/**
+ * Les journées archivées d'une fenêtre de temps.
+ *
+ * La journée en cours est toujours exclue : elle n'est pas finie, et son taux
+ * partiel tirerait toutes les moyennes vers le bas.
+ *
+ * `jours`    : largeur de la fenêtre, ou null pour tout l'historique.
+ * `decalage` : de combien de jours reculer la fin de la fenêtre. Avec
+ *              jours = 7 et decalage = 7, on obtient la semaine d'avant, ce
+ *              qui permet de comparer deux périodes de même longueur.
+ *
+ * Convention : début inclus, fin exclue. C'est elle qui permet d'accoler deux
+ * fenêtres sans trou ni chevauchement — ce dont la comparaison d'une semaine
+ * à l'autre a précisément besoin.
+ */
+export function journeesTerminees(etat, jours = null, decalage = 0) {
+  const fin = ajouterJours(etat.jour.date, -decalage);      // borne exclue
+  const debut = jours ? ajouterJours(fin, -jours) : null;   // borne incluse
+  return Object.keys(etat.histoire).sort()
+    .filter((k) => k < fin && (!debut || k >= debut))
+    .map((k) => ({ date: k, ...etat.histoire[k] }));
+}
+
+/**
+ * Le bilan d'une période.
+ *
+ * Deux taux, qui ne disent pas la même chose :
+ *  - tauxMoyen  : la moyenne des taux journaliers. Chaque journée pèse pareil,
+ *                 qu'elle compte 12 ou 21 cases. C'est « en moyenne, quelle
+ *                 part de ma journée est-ce que je fais ».
+ *  - tauxGlobal : cases cochées ÷ cases affichées. Les journées longues pèsent
+ *                 plus lourd. C'est « combien de cases ai-je réellement faites ».
+ *
+ * Les dimanches de repos n'ont aucune case : ils sont comptés à part et
+ * n'entrent dans aucune moyenne, sans quoi ils la fausseraient.
+ */
+export function statsPeriode(etat, jours = null, decalage = 0) {
+  const js = journeesTerminees(etat, jours, decalage);
+  const comptees = js.filter((j) => (j.total || 0) > 0);
+  const somme = (f) => comptees.reduce((s, j) => s + f(j), 0);
+  const taux = comptees.map((j) => ({ date: j.date, taux: j.faites / j.total }));
+
+  const total = somme((j) => j.total || 0);
+  const faites = somme((j) => j.faites || 0);
+  return {
+    jours,
+    joursComptes: comptees.length,
+    joursRepos: js.length - comptees.length,
+    tauxMoyen: comptees.length ? taux.reduce((s, t) => s + t.taux, 0) / comptees.length : null,
+    tauxGlobal: total ? faites / total : null,
+    faites, total,
+    rates: somme((j) => j.rates || 0),
+    ratesParJour: comptees.length ? somme((j) => j.rates || 0) / comptees.length : null,
+    parfaits: comptees.filter((j) => (j.rates || 0) === 0).length,
+    meilleur: taux.length ? taux.reduce((a, b) => (b.taux > a.taux ? b : a)) : null,
+    pire: taux.length ? taux.reduce((a, b) => (b.taux < a.taux ? b : a)) : null,
+  };
+}
+
+/**
+ * Taux moyen par jour de la semaine, du lundi au dimanche.
+ * C'est l'information qui dit « je tiens mieux le mardi que le samedi » —
+ * d'autant plus lisible ici que la liste n'a pas la même longueur selon
+ * les jours, et que le taux en tient déjà compte.
+ */
+export function tauxParJourSemaine(etat) {
+  const seaux = Array.from({ length: 7 }, () => []);
+  for (const j of journeesTerminees(etat)) {
+    if (!(j.total > 0)) continue;
+    seaux[jourSemaine(j.date)].push(j.faites / j.total);
+  }
+  const ordre = [1, 2, 3, 4, 5, 6, 0];   // lundi d'abord, dimanche en dernier
+  return ordre.map((n) => ({
+    jsem: n,
+    nom: nomJourSemaine(n),
+    jours: seaux[n].length,
+    taux: seaux[n].length ? seaux[n].reduce((a, b) => a + b, 0) / seaux[n].length : null,
+  }));
+}
+
+/** Les sept derniers jours comparés aux sept précédents. */
+export function tendance(etat) {
+  const recent = statsPeriode(etat, 7, 0);
+  const avant = statsPeriode(etat, 7, 7);
+  const delta = recent.tauxMoyen !== null && avant.tauxMoyen !== null
+    ? recent.tauxMoyen - avant.tauxMoyen : null;
+  return { recent, avant, delta };
 }
 
 /** Vrai si la date est dans le futur par rapport au jour logique (garde-fou). */

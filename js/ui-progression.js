@@ -4,22 +4,23 @@
 // Ordre d'importance à l'écran :
 //   1. les heures hors de la maison (tout le quota GTG en dépend) ;
 //   2. les protocoles et les habitudes retirées, qui changent la liste du jour ;
-//   3. les statistiques, dont le taux par habitude — l'information qui sert
-//      vraiment à décider quelles lignes garder.
+//   3. un aperçu des statistiques. Le détail — moyennes par période, taux par
+//      jour de la semaine, classement des habitudes — vit sur l'écran Détail,
+//      qui s'ouvre depuis le bouton sous le graphique.
 // ---------------------------------------------------------------------------
 
 import { $, el, vider, montrer, ouvrirModale, fermerModale, confirmer, informer } from './ui-commun.js';
 import {
   formatHeures, confirmerHeures, lancerProtocole, arreterProtocole,
-  series, serie30jours, tauxParHabitude, oublierHabitude, ratesDeLaSemaine, taper,
+  series, serie30jours, ratesDeLaSemaine, taper,
   protocolesActifs, SEUIL_COMME_STADE,
 } from './model.js';
+import { dessinerTaux, graphiqueDisponible } from './graphique.js';
 import { DUREES_PROTOCOLE } from './defaults.js';
-import { dateLisible, dateCourte, jourSemaine, nomJourSemaine } from './dates.js';
+import { dateLisible, jourSemaine, nomJourSemaine } from './dates.js';
 import { exporterJSON, importerJSON } from './store.js';
 
 let api = null;
-let graphique = null;
 let saisieHeures = 0;   // valeur actuellement affichée par la réglette
 
 export function initProgression(a) {
@@ -62,7 +63,6 @@ export function rendreProgression(etat, jour) {
   rendreRetirees(etat, jour);
   rendreChiffres(etat, jour);
   rendreGraphique(etat, jour);
-  rendreTaux(etat, jour);
 }
 
 // --- Heures hors de la maison ----------------------------------------------
@@ -295,125 +295,17 @@ function tuile(valeur, libelle, classe = '') {
 }
 
 function rendreGraphique(etat, jour) {
-  const donnees = serie30jours(etat, jour);
   const secours = $('#graph-secours');
-
-  if (!window.Chart) {           // CDN injoignable : on dégrade proprement
+  const toile = $('#graph-30');
+  if (!graphiqueDisponible()) {
     secours.hidden = false;
-    $('#graph-30').hidden = true;
+    toile.hidden = true;
     return;
   }
   secours.hidden = true;
-  $('#graph-30').hidden = false;
-
-  const style = getComputedStyle(document.documentElement);
-  // Le graphique emprunte les encres du carnet : barres à l'encre verte,
-  // courbe à l'encre douce, quadrillage aux réglures.
-  const accent = style.getPropertyValue('--vert').trim();
-  const attenue = style.getPropertyValue('--encre-douce').trim();
-  const filet = style.getPropertyValue('--reglure').trim();
-
-  const labels = donnees.map((d) => dateCourte(d.date));
-  // Le graphique montre le taux, pas le nombre de cases. Le dénominateur est le
-  // nombre d'habitudes réellement affichées ce jour-là : un jeudi, où plusieurs
-  // habitudes sont retirées, tout cocher donne bien 100 %. Deux journées de
-  // longueurs différentes deviennent ainsi comparables.
-  const taux = donnees.map((d) => (d.taux === null ? null : Math.round(d.taux * 100)));
-
-  if (graphique) {
-    graphique.data.labels = labels;
-    graphique.data.datasets[0].data = taux;
-    graphique.update('none');
-    return;
-  }
-
-  graphique = new Chart($('#graph-30'), {
-    data: {
-      labels,
-      datasets: [
-        { type: 'bar', data: taux, backgroundColor: accent, borderRadius: 2,
-          barPercentage: 0.72, categoryPercentage: 0.9, yAxisID: 'y' },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 260 },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          displayColors: false,
-          callbacks: {
-            label: (c) => {
-              const d = donnees[c.dataIndex];
-              return `${c.raw} % — ${d.faites} cochée${d.faites > 1 ? 's' : ''} sur ${d.total}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { color: filet },
-          ticks: { color: attenue, font: { size: 9 }, maxRotation: 0, autoSkip: false,
-            callback: (v, i) => (i % 6 === 0 || i === labels.length - 1 ? labels[i] : '') },
-        },
-        y: {
-          min: 0, max: 100,
-          grid: { color: filet }, border: { display: false },
-          ticks: { color: attenue, font: { size: 9 }, stepSize: 50,
-            callback: (v) => `${v} %` },
-        },
-      },
-    },
-  });
-}
-
-function rendreTaux(etat, jour) {
-  const cible = $('#taux-habitudes');
-  vider(cible);
-  const lignes = tauxParHabitude(etat, 30, jour);
-  if (!lignes.length) {
-    cible.append(el('div', { class: 'vide', text: 'Pas encore assez d’historique.' }));
-    return;
-  }
-
-  // Ce classement sert à décider quelles lignes garder : il ne montre donc que
-  // les habitudes de la liste actuelle. Celles qu'on en a retirées sont
-  // reléguées plus bas, avec de quoi les oublier pour de bon.
-  const actuelles = lignes.filter((l) => l.actuelle);
-  const anciennes = lignes.filter((l) => !l.actuelle);
-
-  for (const l of actuelles) cible.append(barreHabitude(l));
-
-  if (!anciennes.length) return;
-  cible.append(el('div', { class: 'anciennes' }, [
-    el('h3', { text: 'Retirées de la liste' }),
-    el('p', { class: 'vide', style: 'margin:-2px 0 8px',
-      text: 'Leur historique est gardé au cas où elles reviendraient. La croix l’efface définitivement.' }),
-    ...anciennes.map((l) => barreHabitude(l, async () => {
-      if (!await confirmer('Oublier cette habitude ?',
-        `L’historique de « ${l.nom} » sera effacé. Les taux des journées passées, eux, ne changent pas.`,
-        'Oublier')) return;
-      oublierHabitude(etat, l.nom);
-      api.apresAction();
-    })),
-  ]));
-}
-
-/** Une barre du classement. `oublier` ajoute la croix de suppression. */
-function barreHabitude(l, oublier) {
-  const pct = Math.round(l.taux * 100);
-  const classe = pct < 40 ? 'faible' : pct >= 85 ? 'forte' : '';
-  return el('div', { class: `barre ${classe}`.trim() }, [
-    el('div', { class: 'haut' }, [
-      el('b', { text: l.nom }),
-      el('span', { text: `${pct}% · ${l.faites}/${l.total}` }),
-      oublier ? el('button', { class: 'oublier', text: '✕',
-        'aria-label': 'Oublier cette habitude', onclick: oublier }) : null,
-    ]),
-    el('div', { class: 'piste' }, [el('div', { class: 'jauge', style: `width:${pct}%` })]),
-  ]);
+  toile.hidden = false;
+  // En petit ici : le grand graphique et tout le reste sont sur l'écran Détail.
+  dessinerTaux(toile, serie30jours(etat, jour), { hauteurEtiquettes: 10 });
 }
 
 // --- Export / import --------------------------------------------------------

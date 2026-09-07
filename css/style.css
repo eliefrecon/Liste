@@ -342,11 +342,13 @@ body.repos #lignes::after { display: none; }
 
 /* Le seul autre élément de l'écran d'accueil — et le seul autorisé à passer
    sous la ligne de flottaison. */
-#bascule {
+/* Le bouton pleine largeur qui mène à un autre écran : sur l'accueil vers
+   Progression, sous le graphique vers Détail. Une boîte tracée à l'encre, avec
+   son ombre portée, qui s'enfonce au toucher. */
+.bouton-ecran {
   display: block;
-  width: calc(100% - 28px);
+  width: 100%;
   height: 54px;
-  margin: 26px 14px 0;
   border: 1.5px solid var(--encre);
   border-radius: var(--rayon);
   background: var(--papier-2);
@@ -356,8 +358,16 @@ body.repos #lignes::after { display: none; }
   font-style: italic;
   transition: transform 90ms ease, box-shadow 90ms ease;
 }
-#bascule::after { content: " →"; font-style: normal; }
-#bascule:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
+.bouton-ecran::after { content: " →"; font-style: normal; }
+.bouton-ecran:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
+
+#bascule {
+  width: calc(100% - 28px);
+  /* Juste assez pour que le bouton passe sous la ligne de flottaison : il
+     faut faire défiler d'un cheveu pour l'atteindre, tandis que la dernière
+     habitude, elle, reste visible sans défiler. */
+  margin: 26px 14px 0;
+}
 
 /* --- Le dimanche de repos : récompense rare, page soignée ------------------ */
 
@@ -652,6 +662,65 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Le taux par habitude : des barres tracées à la règle. */
+/* Petit sur Progression, grand sur Détail. */
+.graph.petit { height: 122px; margin-bottom: 12px; }
+.graph.grand { height: 250px; }
+
+/* --- L'écran Détail : moyennes par période ------------------------------- */
+
+.periode { padding: 14px 0; border-bottom: 1px solid var(--reglure); }
+.periode:last-child { border-bottom: 0; }
+.periode h3 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+
+.grand-taux { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.grand-taux b {
+  font-size: 42px;
+  font-weight: 400;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.grand-taux span { font-size: 13.5px; font-style: italic; color: var(--encre-douce); }
+
+/* Une liste de faits : intitulé à gauche, valeur à droite, sur une réglure. */
+.faits { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0; }
+.faits dt {
+  padding: 6px 0;
+  font-size: 14.5px;
+  color: var(--encre-douce);
+  border-bottom: 1px solid var(--reglure);
+}
+.faits dd {
+  margin: 0;
+  padding: 6px 0;
+  text-align: right;
+  border-bottom: 1px solid var(--reglure);
+  font-variant-numeric: oldstyle-nums;
+}
+.faits dt:last-of-type, .faits dd:last-of-type { border-bottom: 0; }
+.faits dd b { font-size: 15.5px; font-weight: 600; }
+.faits dd i { font-size: 12.5px; color: var(--encre-pale); margin-left: 7px; }
+
+.tendance { margin-bottom: 14px; }
+.tendance b {
+  display: block;
+  font-size: 34px;
+  font-weight: 400;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.tendance span {
+  display: block;
+  margin-top: 3px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+}
+.tendance.hausse b { color: var(--vert); }
+.tendance.baisse b { color: var(--marge); }
+
 .barre { padding: 9px 0 10px; border-bottom: 1px solid var(--reglure); }
 .barre:last-child { border-bottom: 0; }
 .barre .haut { display: flex; align-items: baseline; gap: 8px; }

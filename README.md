@@ -88,7 +88,7 @@ haut de `css/style.css`.
 ## Organisation des fichiers
 
 ```
-index.html              la page ; les quatre écrans y sont décrits
+index.html              la page ; les cinq écrans y sont décrits
 manifest.webmanifest    nom, icône et mode plein écran de l'application
 sw.js                   fonctionnement hors ligne
 css/style.css           toute la mise en forme
@@ -105,8 +105,10 @@ js/
   model.js        toute la logique : restrictions, quota GTG, protocoles,
                   bascule de journée, ratés, statistiques
   ui-commun.js    navigation entre écrans, modales
+  graphique.js    le graphique du taux, partagé par deux écrans
   ui-liste.js     l'écran d'accueil
   ui-progression.js  le second écran
+  ui-detail.js    l'écran Détail : moyennes, tendance, classements
   ui-editeur.js   l'éditeur de liste
   ui-regles.js    le mémo des consignes
   app.js          démarrage et coordination
@@ -216,6 +218,22 @@ habitude supprimée.
   de deviner, en comparant la hauteur de l'écran à celle de la fenêtre : c'était
   faux, cette différence pouvant venir du bas, et des habitudes se retrouvaient
   inaccessibles sous le bandeau.
+- **L'écran Détail** s'ouvre depuis le bouton sous le graphique de Progression.
+  Il rassemble ce qui se lit posément : le graphique en grand, les moyennes sur
+  7 jours, 30 jours, 3 mois et depuis le début, la tendance d'une semaine à
+  l'autre, le taux par jour de la semaine, et le classement des habitudes.
+- **Deux moyennes cohabitent, et ne disent pas la même chose.** `tauxMoyen` est
+  la moyenne des taux journaliers : chaque journée pèse pareil, qu'elle compte
+  12 ou 21 cases. `tauxGlobal` est le ratio cases cochées ÷ cases affichées :
+  les journées longues y pèsent plus lourd. La première répond à « quelle part
+  de ma journée est-ce que je fais », la seconde à « combien de cases ai-je
+  faites ». Voir `statsPeriode` dans `js/model.js`.
+- **La journée en cours n'entre dans aucune moyenne** : elle n'est pas finie,
+  et son taux partiel tirerait tous les chiffres vers le bas. Seul le graphique
+  la montre, comme dernière barre.
+- **Les fenêtres de temps ont leur début inclus et leur fin exclue**
+  (`journeesTerminees`). C'est cette convention qui permet d'accoler la semaine
+  en cours et la précédente sans trou ni chevauchement.
 - **Le classement par habitude ne montre que la liste actuelle.** C'est à quoi
   il sert : décider quelles lignes garder. Les habitudes retirées de la liste
   sont reléguées sous le classement, avec leur historique et une croix pour

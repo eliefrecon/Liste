@@ -31,6 +31,7 @@ export function vider(n) { while (n.firstChild) n.removeChild(n.firstChild); }
 const ECRANS = {
   liste:       { id: 'ecran-liste',       rang: 0 },
   progression: { id: 'ecran-progression', rang: 1 },
+  detail:      { id: 'ecran-detail',      rang: 2 },
   editeur:     { id: 'ecran-editeur',     rang: 2 },
   regles:      { id: 'ecran-regles',      rang: 2 },
 };

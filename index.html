@@ -41,7 +41,7 @@
     <p id="repos-detail"></p>
   </div>
 
-  <button id="bascule">Progression</button>
+  <button id="bascule" class="bouton-ecran">Progression</button>
 </section>
 
 <!-- =====================================================================
@@ -94,13 +94,9 @@
 
     <section class="bloc">
       <h2>Taux de réussite, 30 derniers jours</h2>
-      <div class="graph"><canvas id="graph-30"></canvas></div>
+      <div class="graph petit"><canvas id="graph-30"></canvas></div>
       <div id="graph-secours" class="vide" hidden>Graphique indisponible hors ligne.</div>
-    </section>
-
-    <section class="bloc">
-      <h2>Taux de réussite par habitude</h2>
-      <div id="taux-habitudes"></div>
+      <button class="bouton-ecran" data-vers="detail">Détail</button>
     </section>
 
     <section class="bloc pile">
@@ -125,7 +121,18 @@
 </section>
 
 <!-- =====================================================================
-     3. ÉDITEUR DE LISTE
+     3. DÉTAIL — les statistiques qui se lisent posément.
+     ===================================================================== -->
+<section id="ecran-detail" class="ecran">
+  <header class="entete">
+    <button class="retour" data-vers="progression">Progression</button>
+    <h1>Détail</h1>
+  </header>
+  <div class="defilant" id="detail-contenu"></div>
+</section>
+
+<!-- =====================================================================
+     4. ÉDITEUR DE LISTE
      ===================================================================== -->
 <section id="ecran-editeur" class="ecran">
   <header class="entete">
@@ -146,7 +153,7 @@
 </section>
 
 <!-- =====================================================================
-     4. RÈGLES
+     5. RÈGLES
      ===================================================================== -->
 <section id="ecran-regles" class="ecran">
   <header class="entete">
