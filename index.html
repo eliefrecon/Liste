@@ -128,7 +128,14 @@
     <button class="retour" data-vers="progression">Progression</button>
     <h1>Détail</h1>
   </header>
-  <div class="defilant" id="detail-contenu"></div>
+  <div class="defilant">
+    <section class="bloc">
+      <h2>Taux de réussite, 30 derniers jours</h2>
+      <div class="graph grand"><canvas id="graph-detail"></canvas></div>
+      <div id="detail-secours" class="vide" hidden>Graphique indisponible hors ligne.</div>
+    </section>
+    <div id="detail-contenu"></div>
+  </div>
 </section>
 
 <!-- =====================================================================

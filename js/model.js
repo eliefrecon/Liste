@@ -626,6 +626,57 @@ export function oublierHabitude(etat, nom) {
 }
 
 
+
+// --- Rattrapage de la veille -------------------------------------------------
+
+/**
+ * La journée d'hier, si elle est encore modifiable.
+ *
+ * On ne peut corriger que la veille, jamais au-delà : oublier de cocher arrive,
+ * mais réécrire une semaine entière après coup viderait les statistiques de
+ * leur sens. La fenêtre se ferme donc d'elle-même à la bascule de 4h00.
+ *
+ * Renvoie null s'il n'y a rien à corriger : application pas ouverte hier, ou
+ * dimanche de repos, qui n'avait aucune case.
+ */
+export function veilleModifiable(etat) {
+  const k = ajouterJours(etat.jour.date, -1);
+  const s = etat.histoire[k];
+  if (!s || s.repos || !(s.affichees || []).length) return null;
+  return {
+    date: k,
+    lignes: s.affichees.map((nom) => ({ nom, faite: (s.cochees || []).includes(nom) })),
+    faites: (s.cochees || []).length,
+    total: s.affichees.length,
+    oubliees: s.affichees.length - (s.cochees || []).length,
+  };
+}
+
+/**
+ * Coche ou décoche une habitude sur la journée d'hier.
+ *
+ * Les totaux de la journée sont recalculés, donc les ratés, la série et le
+ * graphique suivent aussitôt — c'est bien le but : rattraper un oubli doit
+ * pouvoir sauver une série.
+ *
+ * Renvoie true si quelque chose a changé.
+ */
+export function cocherVeille(etat, nom, fait) {
+  const k = ajouterJours(etat.jour.date, -1);
+  const s = etat.histoire[k];
+  if (!s || !(s.affichees || []).includes(nom)) return false;
+
+  const cochees = s.cochees || [];
+  if (cochees.includes(nom) === fait) return false;
+  s.cochees = fait ? [...cochees, nom] : cochees.filter((n) => n !== nom);
+
+  // Seules les habitudes affichées comptent : les bonus sont ailleurs.
+  s.faites = s.cochees.length;
+  s.total = s.affichees.length;
+  s.rates = Math.max(0, s.total - s.faites);
+  return true;
+}
+
 // --- Statistiques détaillées ------------------------------------------------
 
 /**

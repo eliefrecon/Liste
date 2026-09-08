@@ -218,10 +218,24 @@ habitude supprimée.
   de deviner, en comparant la hauteur de l'écran à celle de la fenêtre : c'était
   faux, cette différence pouvant venir du bas, et des habitudes se retrouvaient
   inaccessibles sous le bandeau.
+- **Corriger la veille.** L'écran Détail propose, tout en haut, de cocher ce
+  qu'on a oublié hier. Seule la veille est modifiable : la fenêtre se ferme
+  d'elle-même à la bascule de 4h00 (`veilleModifiable` dans `js/model.js`).
+  Oublier de cocher arrive ; réécrire une semaine entière après coup viderait
+  les statistiques de leur sens. La correction recalcule les totaux de la
+  journée, donc les ratés, la série et le graphique suivent — c'est le but :
+  rattraper un oubli doit pouvoir sauver une série.
 - **L'écran Détail** s'ouvre depuis le bouton sous le graphique de Progression.
   Il rassemble ce qui se lit posément : le graphique en grand, les moyennes sur
   7 jours, 30 jours, 3 mois et depuis le début, la tendance d'une semaine à
   l'autre, le taux par jour de la semaine, et le classement des habitudes.
+- **Le graphique retient ses instances par élément, pas par identifiant.**
+  `graphique.js` garde les instances Chart.js dans une table indexée par l'`id`
+  de la toile. Mais un `id` nomme une place, pas un objet : quand un écran est
+  reconstruit, la nouvelle toile porte le même nom sans être le même élément,
+  et l'instance continuerait de peindre sur l'ancienne — détachée du document.
+  D'où la vérification `instance.canvas === toile` avant toute mise à jour, et
+  la toile de l'écran Détail sortie de la zone reconstruite.
 - **Deux moyennes cohabitent, et ne disent pas la même chose.** `tauxMoyen` est
   la moyenne des taux journaliers : chaque journée pèse pareil, qu'elle compte
   12 ou 21 cases. `tauxGlobal` est le ratio cases cochées ÷ cases affichées :

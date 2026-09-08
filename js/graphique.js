@@ -37,10 +37,21 @@ export function dessinerTaux(toile, donnees, { hauteurEtiquettes = 6 } = {}) {
 
   const existant = instances.get(toile.id);
   if (existant) {
-    existant.data.labels = labels;
-    existant.data.datasets[0].data = taux;
-    existant.update('none');
-    return;
+    // L'identifiant nomme une place, pas un objet : une toile refabriquée porte
+    // le même nom sans être le même élément. Si l'instance est restée accrochée
+    // à l'ancienne toile, elle peindrait dans le vide — la nouvelle resterait
+    // blanche. On vérifie donc l'identité de l'élément, pas son nom.
+    if (existant.canvas === toile && toile.isConnected) {
+      existant.data.labels = labels;
+      existant.data.datasets[0].data = taux;
+      existant.update('none');
+      // La toile a pu être mesurée alors que son écran était encore masqué :
+      // on lui redonne ses dimensions au cas où.
+      existant.resize();
+      return;
+    }
+    existant.destroy();
+    instances.delete(toile.id);
   }
 
   instances.set(toile.id, new window.Chart(toile, {

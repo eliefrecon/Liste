@@ -10,12 +10,14 @@
 // la montre, comme dernière barre.
 // ---------------------------------------------------------------------------
 
-import { $, el, vider, confirmer } from './ui-commun.js';
+import { $, el, vider, confirmer, ouvrirModale, fermerModale } from './ui-commun.js';
 import {
   serie30jours, statsPeriode, tauxParJourSemaine, tendance,
   tauxParHabitude, oublierHabitude, series,
+  veilleModifiable, cocherVeille,
 } from './model.js';
 import { dessinerTaux, graphiqueDisponible } from './graphique.js';
+import { dateLisible } from './dates.js';
 
 let api = null;
 
@@ -30,24 +32,84 @@ export function rendreDetail(etat, jour) {
   const cible = $('#detail-contenu');
   vider(cible);
 
-  // --- Le graphique, en grand ---
-  const bloc = el('section', { class: 'bloc' }, [
-    el('h2', { text: 'Taux de réussite, 30 derniers jours' }),
-  ]);
-  if (graphiqueDisponible()) {
-    const toile = el('canvas', { id: 'graph-detail' });
-    bloc.append(el('div', { class: 'graph grand' }, [toile]));
-    cible.append(bloc);
-    dessinerTaux(toile, serie30jours(etat, jour), { hauteurEtiquettes: 5 });
-  } else {
-    bloc.append(el('div', { class: 'vide', text: 'Graphique indisponible hors ligne.' }));
-    cible.append(bloc);
-  }
+  // Le graphique vit dans index.html, hors de la zone reconstruite : sa toile
+  // reste le même élément d'un affichage à l'autre, et Chart.js peut la
+  // retrouver au lieu de peindre sur une toile détachée.
+  const toile = $('#graph-detail');
+  const secours = $('#detail-secours');
+  secours.hidden = graphiqueDisponible();
+  toile.hidden = !graphiqueDisponible();
+  dessinerTaux(toile, serie30jours(etat, jour), { hauteurEtiquettes: 5 });
 
+  cible.append(blocVeille(etat));
   cible.append(blocPeriodes(etat));
   cible.append(blocTendance(etat));
   cible.append(blocSemaine(etat));
   cible.append(blocHabitudes(etat, jour));
+}
+
+// --- Le rattrapage de la veille ---------------------------------------------
+
+/**
+ * Ce bloc n'a de sens qu'aujourd'hui : demain, hier ne sera plus modifiable.
+ * Il est donc placé en tête de l'écran, avant les statistiques qu'on lit
+ * posément — c'est la seule chose ici qui expire.
+ */
+function blocVeille(etat) {
+  const v = veilleModifiable(etat);
+  const bloc = el('section', { class: 'bloc' }, [el('h2', { text: 'Hier' })]);
+
+  if (!v) {
+    bloc.append(el('div', { class: 'vide',
+      text: 'Rien à corriger : aucune journée enregistrée hier.' }));
+    return bloc;
+  }
+
+  bloc.append(el('div', { class: 'item' }, [
+    el('div', { class: 'ptxt' }, [
+      el('div', { class: 'ptitre', text: v.oubliees
+        ? `${v.oubliees} case${v.oubliees > 1 ? 's' : ''} non cochée${v.oubliees > 1 ? 's' : ''}`
+        : 'Tout était coché' }),
+      el('div', { class: 'psous', text: `${dateLisible(v.date)} · ${v.faites} sur ${v.total}` }),
+    ]),
+    el('button', { class: 'paction', text: 'Corriger',
+      onclick: () => ouvrirRattrapage(etat) }),
+  ]));
+  bloc.append(el('p', { class: 'vide', style: 'margin:8px 0 0',
+    text: 'Seule la veille se corrige. Demain, cette journée sera close.' }));
+  return bloc;
+}
+
+/** La feuille où l'on coche et décoche les habitudes d'hier. */
+function ouvrirRattrapage(etat) {
+  const dessiner = () => {
+    const v = veilleModifiable(etat);
+    if (!v) { fermerModale(); return; }
+
+    // Les oubliées d'abord : ce sont elles qu'on vient corriger.
+    const lignes = [...v.lignes].sort((a, b) => Number(a.faite) - Number(b.faite));
+
+    ouvrirModale(
+      el('h2', { text: 'Corriger hier' }),
+      el('p', { class: 'intro',
+        text: `${dateLisible(v.date)} — ${v.faites} cochée${v.faites > 1 ? 's' : ''} sur ${v.total}.` }),
+      el('div', { class: 'rattrapage' }, lignes.map((l) => el('button', {
+        class: `veille${l.faite ? ' faite' : ''}`,
+        onclick: () => {
+          if (cocherVeille(etat, l.nom, !l.faite)) {
+            api.apresAction();   // ratés, séries et graphique suivent aussitôt
+            dessiner();          // et la feuille se redessine sur place
+          }
+        },
+      }, [
+        el('span', { class: 'marque-veille', text: l.faite ? '✓' : '' }),
+        el('span', { class: 'nom-veille', text: l.nom }),
+      ]))),
+      el('button', { class: 'btn plein', text: 'Terminé', style: 'margin-top:14px',
+        onclick: fermerModale }),
+    );
+  };
+  dessiner();
 }
 
 // --- Les moyennes par période -----------------------------------------------

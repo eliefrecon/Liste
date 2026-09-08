@@ -666,6 +666,44 @@ input[type="range"]::-moz-range-thumb {
 .graph.petit { height: 122px; margin-bottom: 12px; }
 .graph.grand { height: 250px; }
 
+/* --- Le rattrapage de la veille ------------------------------------------- */
+
+.rattrapage {
+  max-height: 52vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--reglure);
+}
+.veille {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 4px;
+  text-align: left;
+  border-bottom: 1px solid var(--reglure);
+}
+.veille .marque-veille {
+  flex: 0 0 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--reglure-fort);
+  border-radius: var(--rayon);
+  color: var(--vert);
+  font-size: 17px;
+  line-height: 1;
+}
+.veille .nom-veille {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.veille.faite .marque-veille { border-color: var(--vert); background: var(--vert-clair); }
+.veille.faite .nom-veille { color: var(--encre-pale); }
+.veille:active { background: var(--vert-clair); }
+
 /* --- L'écran Détail : moyennes par période ------------------------------- */
 
 .periode { padding: 14px 0; border-bottom: 1px solid var(--reglure); }
