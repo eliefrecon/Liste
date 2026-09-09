@@ -31,7 +31,7 @@
   --filet:       rgba(20, 18, 14, 0.22);   /* filets fins */
   --filet-fort:  rgba(20, 18, 14, 0.62);
   --massif:      #14120e;                  /* les filets épais */
-  --grise:       rgba(20, 18, 14, 0.075);  /* le fond d'une ligne cochée */
+  --grise:       rgba(20, 18, 14, 0.155);  /* le fond d'une ligne cochée */
 
   --rouge:       #ab2318;   /* la seule couleur : celle d'une manchette */
   --signal:      #14120e;   /* barres et jauges : à l'encre, comme le reste */
@@ -222,9 +222,11 @@ button { cursor: pointer; }
   background: transparent;
   transition: background 200ms var(--courbe);
 }
-/* Le gris reste léger à dessein : un jour bien rempli met dix lignes sur
-   quinze dans cet état, et un gris franc ferait passer le fait au premier
-   plan alors que c'est le reste à faire qu'il faut voir. */
+/* Le gris est franc, à la demande : il doit se voir sans qu'on ait à lire le
+   nom ni à regarder le pavé. C'est un parti pris assumé — un jour bien rempli
+   met dix lignes sur quinze dans cet état, et l'écran devient alors une suite
+   de bandes grises trouées par ce qui reste à faire. Le blanc du papier, en
+   devenant l'exception, désigne le travail restant. */
 .ligne.faite::before { background: var(--grise); }
 
 /* Une ligne qui porte une information secondaire est un peu plus haute qu'une
