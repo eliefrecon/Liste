@@ -82,9 +82,14 @@ L'application est une page de journal. Tout part de là.
 - **La bande du haut**, sous la barre d'état d'iOS, est opaque et de la couleur
   du papier : elle cache les habitudes qui glisseraient dessous quand on fait
   défiler, sans assombrir l'heure qu'iOS y écrit en noir.
-- **L'icône** reprend le motif : deux filets massifs, un filet rouge de
-  manchette, et le pavé rempli aux deux tiers. Elle est dessinée par
-  `outils/icone.py`, sans aucune bibliothèque.
+- **L'icône, elle, ne suit pas la direction de l'application** : elle suit
+  celle d'iOS, parce qu'elle vit sur l'écran d'accueil au milieu des icônes
+  d'Apple et non dans l'application. Fond plein en dégradé sombre, un seul
+  signe blanc au centre, beaucoup de vide autour : trois lignes de liste, les
+  deux premières faites, la troisième qui se remplit par le bas en rouge. Elle
+  est dessinée par `outils/icone.py`, sans aucune bibliothèque, à partir de
+  fonctions de distance signée — d'où les angles arrondis et l'anticrénelage
+  sans suréchantillonnage.
 - **Aucune police n'est téléchargée.** Avenir Next Condensed et Didot sont déjà
   présentes sur iPhone ; l'application n'a aucune dépendance.
 
