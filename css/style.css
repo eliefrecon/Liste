@@ -229,12 +229,14 @@ button { cursor: pointer; }
    devenant l'exception, désigne le travail restant. */
 .ligne.faite::before { background: var(--grise); }
 
-/* Une ligne qui porte une information secondaire est un peu plus haute qu'une
-   ligne simple — ui-liste.js en tient compte au calibrage. Le facteur a été
-   ramené de 1,5 à 1,18 : à 1,5 la dernière habitude, qui porte une note,
-   faisait 71 pt et son texte centré laissait un vide net en bas de l'écran.
-   À 1,18 elle en fait 60, et la note tient toujours sur sa ligne. */
-.ligne.avec-note { flex-grow: 1.18; }
+/* Toutes les lignes ont exactement la même hauteur, y compris celles qui
+   portent une note. Elles ont longtemps reçu une fois et demie la hauteur des
+   autres, puis 1,3, puis 1,18 — et c'était du poids mort : le nom et la note
+   tiennent dans une ligne ordinaire jusqu'à vingt-cinq habitudes, les deux
+   textes se réduisant avec --h-ligne. La dernière habitude de la liste porte
+   une note ; ce supplément de hauteur se voyait donc en bas de l'écran comme
+   du vide, parce qu'une note en italique pâle ne se lit pas comme du contenu
+   et que tout ce qui suit le nom en gras se lit comme de la marge. */
 
 /* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
 .ligne.eclat::before { animation: eclat 300ms ease-out; }
@@ -269,7 +271,7 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   padding-left: 13px;
   position: relative;
 }
@@ -288,7 +290,7 @@ button { cursor: pointer; }
   font-size: clamp(11px, calc(var(--h-ligne) * 0.28), 15px);
   font-style: italic;
   color: var(--encre-douce);
-  line-height: 1.15;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

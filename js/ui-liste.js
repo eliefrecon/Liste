@@ -6,8 +6,8 @@
 // donc élastiques : elles se partagent exactement la hauteur disponible.
 //
 // Le calibrage est automatique. On mesure la hauteur réellement disponible,
-// on la divise par le nombre de lignes (celles qui portent une information
-// secondaire comptent un peu plus), et on publie le résultat dans la variable
+// on la divise par le nombre de lignes, et on publie le résultat dans la
+// variable
 // CSS --h-ligne. Les tailles de texte, la pastille et le compteur en
 // découlent : 12 habitudes donnent de grandes lignes confortables, 30 des
 // lignes serrées, sans jamais déborder ni laisser de vide.
@@ -25,11 +25,6 @@ const DUREE_APPUI_LONG = 420; // ms
 // déclare pas lui-même.
 const HAUTEUR_BARRE = 47;
 
-// Une ligne avec note est un peu plus haute qu'une ligne simple. À 1,5, la
-// dernière habitude de la liste — qui porte une note — faisait une fois et
-// demie les autres, et son texte centré laissait un vide net au bas de
-// l'écran. Doit rester égal au flex-grow de .ligne.avec-note dans style.css.
-const FACTEUR_NOTE = 1.18;
 
 let zone;           // #lignes
 let signature = ''; // composition actuelle de la liste affichée
@@ -184,9 +179,12 @@ function calibrer() {
 
   const lignes = zone.children;
   if (!lignes.length) return;
-  let unites = 0;
-  for (const l of lignes) unites += l.classList.contains('avec-note') ? FACTEUR_NOTE : 1;
-  zone.style.setProperty('--h-ligne', `${(hauteur / unites).toFixed(2)}px`);
+  // Toutes les lignes se partagent la hauteur à parts égales, y compris celles
+  // qui portent une note : le nom et la note y tiennent jusqu'à vingt-cinq
+  // habitudes, puisque les deux textes se réduisent avec --h-ligne. Leur
+  // donner un supplément de hauteur ne servait qu'à creuser un vide sous la
+  // dernière habitude de la liste, qui est précisément une ligne à note.
+  zone.style.setProperty('--h-ligne', `${(hauteur / lignes.length).toFixed(2)}px`);
 }
 
 /** Échappe un nom d'habitude pour l'utiliser dans un sélecteur CSS. */
@@ -239,7 +237,6 @@ function majLigne(noeud, ligne, jour) {
 
   const note = noeud.querySelector('.note');
   note.textContent = ligne.note;
-  noeud.classList.toggle('avec-note', Boolean(ligne.note));
 
   const cpt = noeud.querySelector('.cpt');
   cpt.textContent = texteCompteur(ligne);

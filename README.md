@@ -69,9 +69,16 @@ L'application est une page de journal. Tout part de là.
   il y a été massif puis absent avant de trouver sa mesure. Absent, il ne
   marchait pas non plus — sans limite visible, une ligne de 50 px se lit plus
   petite qu'elle n'est.
-- **Le haut de l'écran Liste est réduit au strict nécessaire** : la barre
-  d'état d'iOS, 2 px, puis le filet. Tout ce qui était décor au-dessus de la
-  première habitude a été rendu aux habitudes.
+- **Le décor de l'écran Liste est réduit au strict nécessaire** : la barre
+  d'état d'iOS, le filet du haut, le filet du bas. Rien d'autre, ni au-dessus
+  de la première habitude ni au-dessous de la dernière.
+- **Toutes les lignes ont exactement la même hauteur**, y compris celles qui
+  portent une note : le nom et la note y tiennent jusqu'à vingt-cinq
+  habitudes, les deux textes se réduisant avec `--h-ligne`. Elles ont
+  longtemps reçu un supplément de hauteur, ce qui était du poids mort — et
+  visible, puisque la dernière habitude de la liste est justement une ligne à
+  note : le supplément se lisait comme du vide en bas de l'écran, une note en
+  italique pâle ne se lisant pas comme du contenu.
 - **Le texte s'écarte largement des filets.** Les noms sont plus petits que la
   hauteur de ligne ne le permettrait : c'est ce vide qui fait respirer un écran
   de quinze habitudes.
