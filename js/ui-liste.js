@@ -25,8 +25,11 @@ const DUREE_APPUI_LONG = 420; // ms
 // déclare pas lui-même.
 const HAUTEUR_BARRE = 47;
 
-// Une ligne avec note occupe une fois et demie la hauteur d'une ligne simple.
-const FACTEUR_NOTE = 1.5;
+// Une ligne avec note est un peu plus haute qu'une ligne simple. À 1,5, la
+// dernière habitude de la liste — qui porte une note — faisait une fois et
+// demie les autres, et son texte centré laissait un vide net au bas de
+// l'écran. Doit rester égal au flex-grow de .ligne.avec-note dans style.css.
+const FACTEUR_NOTE = 1.3;
 
 let zone;           // #lignes
 let signature = ''; // composition actuelle de la liste affichée

@@ -47,7 +47,7 @@
      démarrage. En bas, rien n'est réservé. */
   --haut: env(safe-area-inset-top);
   --bas: env(safe-area-inset-bottom);
-  --respire: 9px;
+  --respire: 2px;
 
   --duree: 240ms;
   --courbe: cubic-bezier(0.32, 0.72, 0, 1);
@@ -181,8 +181,7 @@ button { cursor: pointer; }
   height: calc(100dvh - var(--haut) - var(--respire));
   display: flex;
   flex-direction: column;
-  margin: 7px 17px 0;
-  padding: 4px 0;
+  margin: 0 17px;
   /* Les deux filets massifs qui ouvrent et ferment la page. Ils sont compris
      dans la hauteur fixée par ui-liste.js : les lignes se partagent ce qui
      reste, la liste ne déborde donc jamais d'un pixel. */
@@ -201,20 +200,21 @@ button { cursor: pointer; }
   overflow: hidden;
   transition: background 200ms var(--courbe);
 }
-/* Rien ne sépare deux habitudes que du vide. Il y a eu ici un filet par
-   ligne : quatorze filets massifs qui découpaient l'écran en quinze cases et
-   ne laissaient plus rien respirer. Un filet posé là est mis à la place de
-   l'espace, pas en plus — seuls restent les deux qui encadrent la liste, qui
-   eux ne coûtent aucune place.
+/* Un filet fin entre deux habitudes. Il donne à chacune une limite visible —
+   sans limite, une ligne de 50 px se lit plus petite qu'elle n'est — et à
+   1,5 px il ne prend aucune place, contrairement aux 2,5 px massifs qu'il y a
+   eu ici et qui transformaient l'écran en quinze cases serrées.
 
-   Le fond grisé d'une ligne cochée est peint par un calque en retrait de 5 px
-   en haut et en bas. Deux lignes faites qui se suivent restent donc deux
-   bandes distinctes, et cette respiration ne prend aucune hauteur à la mise
-   en page : le calque est en position absolue, il ne pousse rien. */
+   Le fond grisé d'une ligne cochée est peint par un calque en retrait de 4 px
+   en haut et en bas, entre les filets. Deux lignes faites qui se suivent
+   restent donc deux bandes distinctes, et cette respiration ne prend aucune
+   hauteur à la mise en page : le calque est en position absolue, il ne pousse
+   rien. */
+.ligne + .ligne { border-top: 1.5px solid var(--filet-fort); }
 .ligne::before {
   content: "";
   position: absolute;
-  inset: 5px 0;
+  inset: 4px 0;
   background: transparent;
   transition: background 200ms var(--courbe);
 }
@@ -223,9 +223,11 @@ button { cursor: pointer; }
    plan alors que c'est le reste à faire qu'il faut voir. */
 .ligne.faite::before { background: var(--grise); }
 
-/* Une ligne qui porte une information secondaire reçoit une fois et demie la
-   hauteur d'une ligne simple — ui-liste.js en tient compte au calibrage. */
-.ligne.avec-note { flex-grow: 1.5; }
+/* Une ligne qui porte une information secondaire est un peu plus haute qu'une
+   ligne simple — ui-liste.js en tient compte au calibrage. Le facteur a été
+   ramené de 1,5 à 1,3 : à 1,5 la dernière habitude, qui porte une note,
+   faisait 71 pt et son texte centré laissait un vide net en bas de l'écran. */
+.ligne.avec-note { flex-grow: 1.3; }
 
 /* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
 .ligne.eclat::before { animation: eclat 300ms ease-out; }
@@ -240,8 +242,8 @@ button { cursor: pointer; }
 .pave {
   position: relative;
   overflow: hidden;
-  width:  clamp(18px, calc(var(--h-ligne) * 0.50), 27px);
-  height: clamp(18px, calc(var(--h-ligne) * 0.50), 27px);
+  width:  clamp(18px, calc(var(--h-ligne) * 0.52), 28px);
+  height: clamp(18px, calc(var(--h-ligne) * 0.52), 28px);
   border: 4px solid var(--encre);
 }
 .pave i {
@@ -265,7 +267,7 @@ button { cursor: pointer; }
   position: relative;
 }
 .nom {
-  font-size: clamp(15px, calc(var(--h-ligne) * 0.47), 24px);
+  font-size: clamp(15px, calc(var(--h-ligne) * 0.50), 25px);
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1.12;
