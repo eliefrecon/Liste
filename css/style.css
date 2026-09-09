@@ -31,7 +31,7 @@
   --filet:       rgba(20, 18, 14, 0.22);   /* filets fins */
   --filet-fort:  rgba(20, 18, 14, 0.62);
   --massif:      #14120e;                  /* les filets épais */
-  --grise:       rgba(20, 18, 14, 0.055);  /* le fond d'une ligne cochée */
+  --grise:       rgba(20, 18, 14, 0.075);  /* le fond d'une ligne cochée */
 
   --rouge:       #ab2318;   /* la seule couleur : celle d'une manchette */
   --signal:      #14120e;   /* barres et jauges : à l'encre, comme le reste */
@@ -47,7 +47,7 @@
      démarrage. En bas, rien n'est réservé. */
   --haut: env(safe-area-inset-top);
   --bas: env(safe-area-inset-bottom);
-  --respire: 2px;
+  --respire: 0px;
 
   --duree: 240ms;
   --courbe: cubic-bezier(0.32, 0.72, 0, 1);
@@ -186,7 +186,11 @@ button { cursor: pointer; }
      dans la hauteur fixée par ui-liste.js : les lignes se partagent ce qui
      reste, la liste ne déborde donc jamais d'un pixel. */
   border-top: 9px solid var(--massif);
-  border-bottom: 9px solid var(--massif);
+  /* Le filet du bas est plus mince que celui du haut. Celui du haut est la
+     manchette, il se pose contre la barre d'état et donne sa carrure à la
+     page ; celui du bas ne fait que clore, et chacun de ses points est un
+     point de moins pour les habitudes. */
+  border-bottom: 4px solid var(--massif);
 }
 
 .ligne {
@@ -225,9 +229,10 @@ button { cursor: pointer; }
 
 /* Une ligne qui porte une information secondaire est un peu plus haute qu'une
    ligne simple — ui-liste.js en tient compte au calibrage. Le facteur a été
-   ramené de 1,5 à 1,3 : à 1,5 la dernière habitude, qui porte une note,
-   faisait 71 pt et son texte centré laissait un vide net en bas de l'écran. */
-.ligne.avec-note { flex-grow: 1.3; }
+   ramené de 1,5 à 1,18 : à 1,5 la dernière habitude, qui porte une note,
+   faisait 71 pt et son texte centré laissait un vide net en bas de l'écran.
+   À 1,18 elle en fait 60, et la note tient toujours sur sa ligne. */
+.ligne.avec-note { flex-grow: 1.18; }
 
 /* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
 .ligne.eclat::before { animation: eclat 300ms ease-out; }
@@ -286,7 +291,17 @@ button { cursor: pointer; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ligne.faite .nom { color: var(--encre-douce); }
+.ligne.faite .nom {
+  color: var(--encre-douce);
+  /* Le nom est barré. Le fond grisé seul ne suffisait pas : sur quinze lignes
+     il fallait regarder la case pour savoir. Un trait au travers du nom se lit
+     sans être lu, et ne prend aucune place — contrairement à un gris plus
+     franc, qui inverserait le rapport entre ce qui est fait et ce qui reste.
+     Il hérite de la couleur du nom : la ligne recule d'un bloc, elle ne se
+     fait pas rayer de rouge. */
+  text-decoration: line-through;
+  text-decoration-thickness: 2.5px;
+}
 .ligne.faite .note { color: var(--encre-pale); }
 
 /* Le compteur est aussi un bouton : le taper retire une unité. Un cartouche

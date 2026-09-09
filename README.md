@@ -83,10 +83,12 @@ L'application est une page de journal. Tout part de là.
   monte d'un cran à chaque tap : un douzième pour une série de grease the
   groove, un quart de litre pour l'eau. Une habitude ordinaire est vide ou
   pleine. Toutes ces lignes passent par une seule fraction, `valeur / max`.
-- **Une ligne cochée reçoit un fond grisé** et son nom recule d'un cran. Le
-  gris est volontairement léger : un jour bien rempli met dix lignes sur quinze
-  dans cet état, et un gris franc ferait passer le fait au premier plan alors
-  que c'est le reste à faire qu'il faut voir.
+- **Une habitude faite est barrée**, sur un fond grisé, et son nom recule d'un
+  cran. Le trait au travers du nom fait tout le travail : le fond grisé seul
+  ne se voyait pas, et il ne pouvait pas être foncé davantage — un jour bien
+  rempli met dix lignes sur quinze dans cet état, et un gris franc ferait
+  passer le fait au premier plan alors que c'est le reste à faire qu'il faut
+  voir. Un trait, lui, se lit sans être lu et ne prend aucune place.
 - **La bande du haut**, sous la barre d'état d'iOS, est opaque et de la couleur
   du papier : elle cache les habitudes qui glisseraient dessous quand on fait
   défiler, sans assombrir l'heure qu'iOS y écrit en noir.

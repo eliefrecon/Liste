@@ -29,7 +29,7 @@ const HAUTEUR_BARRE = 47;
 // dernière habitude de la liste — qui porte une note — faisait une fois et
 // demie les autres, et son texte centré laissait un vide net au bas de
 // l'écran. Doit rester égal au flex-grow de .ligne.avec-note dans style.css.
-const FACTEUR_NOTE = 1.3;
+const FACTEUR_NOTE = 1.18;
 
 let zone;           // #lignes
 let signature = ''; // composition actuelle de la liste affichée
