@@ -61,9 +61,13 @@ L'application est une page de journal. Tout part de là.
 - **L'encre** (`--encre`) est un noir d'impression. Il y a **une seule couleur
   d'appoint** (`--rouge`), celle d'une manchette : elle sert aux intertitres,
   aux marqueurs de l'éditeur, et à ce qui va mal. Jamais ailleurs.
-- **Les filets font toute la mise en page.** Ils sont hiérarchisés et massifs :
-  9 px pour ceux qui ouvrent et ferment la liste, 2,5 px entre deux habitudes,
-  1,5 px pour les séparations secondaires. C'est le seul décor.
+- **Les filets sont massifs, mais rares.** 9 px pour les deux qui ouvrent et
+  ferment la liste, 7 px sous le titre d'un écran, 2,5 px entre deux sections,
+  1,5 px entre deux éléments d'une même section. Il n'y en a aucun entre deux
+  habitudes : un filet posé là serait mis *à la place* de l'espace et non en
+  plus, et quatorze filets découpaient l'écran en quinze cases où plus rien ne
+  respirait. La règle est celle-là — un gros filet partout où il ne coûte pas
+  de vide, rien du tout ailleurs.
 - **Le texte s'écarte largement des filets.** Les noms sont plus petits que la
   hauteur de ligne ne le permettrait : c'est ce vide qui fait respirer un écran
   de quinze habitudes.

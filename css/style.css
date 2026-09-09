@@ -28,7 +28,7 @@
   --encre:       #14120e;   /* noir d'impression */
   --encre-douce: #57524a;   /* second rang */
   --encre-pale:  #938d80;   /* ce qui est fait */
-  --filet:       rgba(20, 18, 14, 0.3);    /* filets fins */
+  --filet:       rgba(20, 18, 14, 0.22);   /* filets fins */
   --filet-fort:  rgba(20, 18, 14, 0.62);
   --massif:      #14120e;                  /* les filets épais */
   --grise:       rgba(20, 18, 14, 0.055);  /* le fond d'une ligne cochée */
@@ -201,25 +201,34 @@ button { cursor: pointer; }
   overflow: hidden;
   transition: background 200ms var(--courbe);
 }
-/* Les filets entre les lignes : épais, mais le texte s'en écarte. */
-.ligne + .ligne::before {
+/* Rien ne sépare deux habitudes que du vide. Il y a eu ici un filet par
+   ligne : quatorze filets massifs qui découpaient l'écran en quinze cases et
+   ne laissaient plus rien respirer. Un filet posé là est mis à la place de
+   l'espace, pas en plus — seuls restent les deux qui encadrent la liste, qui
+   eux ne coûtent aucune place.
+
+   Le fond grisé d'une ligne cochée est peint par un calque en retrait de 5 px
+   en haut et en bas. Deux lignes faites qui se suivent restent donc deux
+   bandes distinctes, et cette respiration ne prend aucune hauteur à la mise
+   en page : le calque est en position absolue, il ne pousse rien. */
+.ligne::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0;
-  border-top: 2.5px solid var(--massif);
+  inset: 5px 0;
+  background: transparent;
+  transition: background 200ms var(--courbe);
 }
-/* Une ligne cochée : un fond grisé, et le nom qui recule d'un cran. Le gris
-   reste léger à dessein — un jour bien rempli met dix lignes sur quinze dans
-   cet état, et un gris franc ferait passer le fait au premier plan alors que
-   c'est le reste à faire qu'il faut voir. */
-.ligne.faite { background: var(--grise); }
+/* Le gris reste léger à dessein : un jour bien rempli met dix lignes sur
+   quinze dans cet état, et un gris franc ferait passer le fait au premier
+   plan alors que c'est le reste à faire qu'il faut voir. */
+.ligne.faite::before { background: var(--grise); }
 
 /* Une ligne qui porte une information secondaire reçoit une fois et demie la
    hauteur d'une ligne simple — ui-liste.js en tient compte au calibrage. */
 .ligne.avec-note { flex-grow: 1.5; }
 
 /* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
-.ligne.eclat { animation: eclat 300ms ease-out; }
+.ligne.eclat::before { animation: eclat 300ms ease-out; }
 @keyframes eclat {
   from { background: rgba(20, 18, 14, 0.26); }
   to   { background: var(--grise); }
@@ -227,7 +236,7 @@ button { cursor: pointer; }
 
 /* --- La marque : un pavé qui se remplit par le bas ------------------------- */
 
-.marque { flex: 0 0 36px; display: grid; place-items: center; }
+.marque { flex: 0 0 36px; display: grid; place-items: center; position: relative; }
 .pave {
   position: relative;
   overflow: hidden;
@@ -253,6 +262,7 @@ button { cursor: pointer; }
   justify-content: center;
   gap: 2px;
   padding-left: 13px;
+  position: relative;
 }
 .nom {
   font-size: clamp(15px, calc(var(--h-ligne) * 0.47), 24px);
@@ -282,6 +292,7 @@ button { cursor: pointer; }
    maximum vaut 1 — les jours de stade, par exemple. */
 .cpt {
   flex: 0 0 auto;
+  position: relative;
   white-space: nowrap;
   padding: 4px 9px;
   background: var(--massif);
@@ -375,10 +386,10 @@ body.repos #lignes { display: none; }
   padding: 0 22px calc(var(--bas) + 44px);
 }
 
-.bloc { padding: 20px 0; border-bottom: 2.5px solid var(--massif); }
+.bloc { padding: 28px 0; border-bottom: 2.5px solid var(--massif); }
 .bloc:last-child { border-bottom: 0; }
 .bloc > h2 {
-  margin: 0 0 13px;
+  margin: 0 0 16px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.24em;
@@ -435,7 +446,7 @@ input[type="range"]::-moz-range-thumb {
 .btn {
   display: block;
   width: 100%;
-  padding: 15px;
+  padding: 17px;
   border: 3px solid var(--massif);
   font-size: 14.5px;
   font-weight: 700;
@@ -468,7 +479,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .btn-rang { display: flex; gap: 10px; }
 .btn-rang .btn { flex: 1 1 0; }
-.pile > * + * { margin-top: 11px; }
+.pile > * + * { margin-top: 14px; }
 
 /* --- Listes de l'écran progression ---------------------------------------- */
 
@@ -476,7 +487,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 17px 0;
   border-bottom: 1.5px solid var(--filet);
   width: 100%;
   text-align: left;
@@ -543,7 +554,7 @@ input[type="range"]::-moz-range-thumb {
 /* --- Statistiques --------------------------------------------------------- */
 
 .chiffres { display: flex; gap: 10px; }
-.chiffre { flex: 1 1 0; border: 3px solid var(--massif); padding: 12px 6px 10px; text-align: center; }
+.chiffre { flex: 1 1 0; border: 3px solid var(--massif); padding: 16px 6px 14px; text-align: center; }
 .chiffre b {
   display: block;
   font-family: var(--serif);
@@ -569,7 +580,7 @@ input[type="range"]::-moz-range-thumb {
 .graph.grand { height: 250px; }
 
 /* Le taux par habitude, en barres réglées. */
-.barre { padding: 10px 0 11px; border-bottom: 1.5px solid var(--filet); }
+.barre { padding: 15px 0 16px; border-bottom: 1.5px solid var(--filet); }
 .barre:last-child { border-bottom: 0; }
 .barre .haut { display: flex; align-items: baseline; gap: 8px; }
 .barre .haut b {
@@ -717,7 +728,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: baseline;
   gap: 10px;
   width: 100%;
-  padding: 13px 2px;
+  padding: 17px 2px;
   border-bottom: 1.5px solid var(--filet);
   text-align: left;
 }
@@ -797,7 +808,7 @@ input[type="range"]::-moz-range-thumb {
    ÉCRAN RÈGLES
    ========================================================================== */
 
-.groupe { border: 3px solid var(--massif); padding: 14px 13px 4px; margin-bottom: 13px; }
+.groupe { border: 3px solid var(--massif); padding: 19px 16px 8px; margin-bottom: 18px; }
 .groupe h3 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .01em; }
 .aide-groupe {
   margin: 3px 0 13px;
@@ -806,7 +817,7 @@ input[type="range"]::-moz-range-thumb {
   font-style: italic;
   color: var(--encre-douce);
 }
-.ligne-champ { display: block; margin-bottom: 12px; }
+.ligne-champ { display: block; margin-bottom: 17px; }
 .ligne-champ .etiquette {
   display: block;
   font-size: 11px;
@@ -820,7 +831,7 @@ input[type="range"]::-moz-range-thumb {
 .avec-unite .champ.court { width: 104px; text-align: center; }
 .avec-unite .unite { font-family: var(--serif); font-size: 16px; font-style: italic; color: var(--encre-douce); }
 
-.regle { padding: 15px 0; border-bottom: 1.5px solid var(--filet); }
+.regle { padding: 21px 0; border-bottom: 1.5px solid var(--filet); }
 .regle:last-child { border-bottom: 0; }
 .entete-regle { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .titre-regle {
@@ -900,7 +911,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 11px 2px;
+  padding: 15px 2px;
   text-align: left;
   border-bottom: 1.5px solid var(--filet);
 }
@@ -924,7 +935,7 @@ input[type="range"]::-moz-range-thumb {
 .veille:active { background: var(--grise); }
 
 /* Les moyennes par période. */
-.periode { padding: 14px 0; border-bottom: 1.5px solid var(--filet); }
+.periode { padding: 19px 0; border-bottom: 1.5px solid var(--filet); }
 .periode:last-child { border-bottom: 0; }
 .periode h3 {
   margin: 0 0 6px;
@@ -944,7 +955,7 @@ input[type="range"]::-moz-range-thumb {
 
 .faits { margin: 0; display: grid; grid-template-columns: 1fr auto; }
 .faits dt {
-  padding: 6px 0;
+  padding: 9px 0;
   font-family: var(--serif);
   font-size: 15px;
   color: var(--encre-douce);
@@ -952,7 +963,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .faits dd {
   margin: 0;
-  padding: 6px 0;
+  padding: 9px 0;
   text-align: right;
   border-bottom: 1.5px solid var(--filet);
 }
