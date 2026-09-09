@@ -51,35 +51,41 @@ qu'elle se mette en cache. Ensuite elle fonctionne hors ligne.
 
 ---
 
-## La direction artistique : le carnet
+## La direction artistique : la presse
 
-L'application est un cahier. Tout part de là.
+L'application est une page de journal. Tout part de là.
 
-- **Le papier** (`--papier`) est un crème franchement jaune, avec son grain :
-  un bruit inscrit dans la feuille de style, multiplié par-dessus tout. Il n'y
-  a pas de thème sombre — un carnet ne change pas de couleur la nuit. Le crème
-  est volontairement profond plutôt qu'éclatant, pour rester tenable le soir.
-- **L'encre** (`--encre`) est un bleu-noir. Les **réglures** (`--reglure`) sont
-  d'un bleu-violet pâle, le **filet de marge** (`--marge`) est rouge : c'est un
-  cahier français.
-- **Les coches se posent dans la marge**, à gauche du filet, comme les
-  annotations d'une copie corrigée. Le texte commence après le filet, il ne le
-  touche jamais.
-- **La coche se dessine.** Une ligne qui se coche en douze fois voit son trait
-  avancer d'un douzième à chaque tap. Techniquement : un `<path>` SVG avec
-  `pathLength="100"`, dont on fait varier le `stroke-dashoffset` — le décalage
-  vaut alors directement un pourcentage. Un trait fantôme en pointillé montre
-  où la plume ira, et n'apparaît que sur les lignes qui se cochent en plusieurs
-  fois. Une habitude ordinaire pas encore faite laisse la marge vide.
+- **Le papier** (`--papier`) est un gris chaud de papier journal, avec son
+  grain : un bruit inscrit dans la feuille de style, multiplié par-dessus tout.
+  Il n'y a pas de thème sombre — un journal ne change pas de couleur la nuit.
+- **L'encre** (`--encre`) est un noir d'impression. Il y a **une seule couleur
+  d'appoint** (`--rouge`), celle d'une manchette : elle sert aux intertitres,
+  aux marqueurs de l'éditeur, et à ce qui va mal. Jamais ailleurs.
+- **Les filets font toute la mise en page.** Ils sont hiérarchisés et massifs :
+  9 px pour ceux qui ouvrent et ferment la liste, 2,5 px entre deux habitudes,
+  1,5 px pour les séparations secondaires. C'est le seul décor.
+- **Le texte s'écarte largement des filets.** Les noms sont plus petits que la
+  hauteur de ligne ne le permettrait : c'est ce vide qui fait respirer un écran
+  de quinze habitudes.
+- **Deux familles, deux rôles.** Une condensée grasse (Avenir Next Condensed)
+  pour les noms et les titres de rubrique ; un Didot italique pour tout ce qui
+  commente, chiffre ou précise. On sait au premier coup d'œil ce qui est une
+  habitude et ce qui est une glose.
+- **La marque se remplit par le bas.** Un pavé cerné d'encre, dont l'intérieur
+  monte d'un cran à chaque tap : un douzième pour une série de grease the
+  groove, un quart de litre pour l'eau. Une habitude ordinaire est vide ou
+  pleine. Toutes ces lignes passent par une seule fraction, `valeur / max`.
+- **Une ligne cochée reçoit un fond grisé** et son nom recule d'un cran. Le
+  gris est volontairement léger : un jour bien rempli met dix lignes sur quinze
+  dans cet état, et un gris franc ferait passer le fait au premier plan alors
+  que c'est le reste à faire qu'il faut voir.
 - **La bande du haut**, sous la barre d'état d'iOS, est opaque et de la couleur
   du papier : elle cache les habitudes qui glisseraient dessous quand on fait
   défiler, sans assombrir l'heure qu'iOS y écrit en noir.
-- **Les boîtes** (boutons, cartes, champs) sont tracées d'un filet d'encre avec
-  leur ombre portée, et s'enfoncent au toucher.
-- **L'icône** reprend le motif : une page réglée, son filet de marge rouge,
-  trois lignes d'écriture et les coches dans la marge — la dernière à moitié
-  tracée. Elle est dessinée par `outils/icone.py`, sans aucune bibliothèque.
-- **Aucune police n'est téléchargée.** Iowan Old Style et Charter sont déjà
+- **L'icône** reprend le motif : deux filets massifs, un filet rouge de
+  manchette, et le pavé rempli aux deux tiers. Elle est dessinée par
+  `outils/icone.py`, sans aucune bibliothèque.
+- **Aucune police n'est téléchargée.** Avenir Next Condensed et Didot sont déjà
   présentes sur iPhone ; l'application n'a aucune dépendance.
 
 Pour changer l'ensemble des couleurs, il suffit de modifier les variables en

@@ -164,15 +164,19 @@ function ajusterZonesSures() {
  *
  * La hauteur vient de window.innerHeight, la seule mesure fiable de ce qui est
  * réellement visible — et non d'un calcul en dvh moins des zones sûres qui
- * peuvent être mal déclarées. Toutes les tailles de l'écran Liste découlent
+ * peuvent être mal déclarées. On en retire la position du haut de la liste,
+ * mesurée elle aussi. Toutes les tailles de l'écran Liste découlent
  * ensuite de --h-ligne : la liste remplit l'écran quel que soit le nombre
  * d'habitudes du jour.
  */
 function calibrer() {
-  const haut = ajusterZonesSures();
-  const respire = parseFloat(getComputedStyle(document.documentElement)
-    .getPropertyValue('--respire')) || 0;
-  const hauteur = Math.max(120, window.innerHeight - haut - respire);
+  ajusterZonesSures();
+  // On mesure la position réelle du haut de la liste plutôt que de refaire en
+  // JavaScript l'addition des marges, filets et zones sûres décidés en CSS :
+  // le décor peut changer d'épaisseur sans que ce calcul devienne faux.
+  // L'écran est en position fixe, donc offsetTop se compte bien depuis le haut
+  // de la fenêtre.
+  const hauteur = Math.max(120, window.innerHeight - zone.offsetTop);
   zone.style.height = `${hauteur}px`;
 
   const lignes = zone.children;
@@ -187,37 +191,19 @@ function cssEchappe(s) {
   return window.CSS && CSS.escape ? CSS.escape(s) : s.replace(/["\\]/g, '\\$&');
 }
 
-// Le trait de la coche, tracé à main levée. pathLength="100" normalise sa
-// longueur : le décalage du pointillé vaut alors directement un pourcentage,
-// ce qui permet de dessiner le trait petit à petit.
-const TRACE = 'M3.5 13.8 C5.9 15.3 7.7 17.7 9.1 20.5 C12.3 12.6 16.1 7.1 22.1 3.3';
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
-function chemin(classe) {
-  const p = document.createElementNS(SVG_NS, 'path');
-  p.setAttribute('class', classe);
-  p.setAttribute('d', TRACE);
-  p.setAttribute('pathLength', '100');
-  p.setAttribute('fill', 'none');
-  p.setAttribute('stroke-width', '2.7');
-  p.setAttribute('stroke-linecap', 'round');
-  return p;
-}
-
-function creerCoche() {
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('class', 'coche');
-  svg.setAttribute('viewBox', '0 0 26 26');
-  const fantome = chemin('fantome');
-  const trait = chemin('trait');
-  trait.setAttribute('stroke-dasharray', '100');
-  trait.setAttribute('stroke-dashoffset', '100');
-  svg.append(fantome, trait);
-  return svg;
+/**
+ * La marque d'une ligne : un pavé cerné d'encre qui se remplit par le bas.
+ *
+ * Le geste est le même que partout ailleurs — une seule fraction, valeur ÷ max
+ * — mais rendu en aplat plutôt qu'en trait. Une habitude ordinaire est vide ou
+ * pleine ; un compteur se remplit d'un cran à chaque tap.
+ */
+function creerPave() {
+  return el('span', { class: 'pave' }, [el('i')]);
 }
 
 function creerLigne(ligne) {
-  const marque = el('span', { class: 'marque' }, [creerCoche()]);
+  const marque = el('span', { class: 'marque' }, [creerPave()]);
   const nom = el('span', { class: 'nom', text: ligne.nom });
   const note = el('span', { class: 'note' });
   const txt = el('span', { class: 'txt' }, [nom, note]);
@@ -243,19 +229,10 @@ function majLigne(noeud, ligne, jour) {
   noeud.dataset.faite = ligne.faite ? '1' : '0';
   noeud.classList.toggle('faite', ligne.faite);
 
-  // La coche se dessine à mesure : un douzième de trait par quart de litre.
-  // Elle n'est entière qu'une fois la ligne faite.
+  // Le pavé se remplit par le bas, d'un cran par tap : un douzième pour un
+  // quart de litre. Il n'est plein qu'une fois la ligne faite.
   const part = ligne.max > 0 ? Math.min(ligne.valeur / ligne.max, 1) : 0;
-  const trait = noeud.querySelector('.coche .trait');
-  trait.setAttribute('stroke-dashoffset', (100 - part * 100).toFixed(1));
-  // À longueur nulle, un bout de trait arrondi laisse malgré tout un point
-  // sur le papier : on efface le trait tant que rien n'est commencé.
-  trait.style.display = part > 0 ? '' : 'none';
-  // Le trait fantôme montre où la plume ira. Il ne concerne que les lignes qui
-  // se cochent en plusieurs fois : une habitude ordinaire pas encore faite
-  // laisse la marge vide, comme dans un cahier.
-  noeud.querySelector('.coche .fantome').style.display =
-    ligne.type !== 'case' && !ligne.faite ? '' : 'none';
+  noeud.querySelector('.pave i').style.height = `${(part * 100).toFixed(1)}%`;
 
   const note = noeud.querySelector('.note');
   note.textContent = ligne.note;

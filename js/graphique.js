@@ -28,9 +28,9 @@ export function dessinerTaux(toile, donnees, { hauteurEtiquettes = 6 } = {}) {
   if (!graphiqueDisponible() || !toile) return;
 
   const style = getComputedStyle(document.documentElement);
-  const vert = style.getPropertyValue('--vert').trim();
+  const vert = style.getPropertyValue('--signal').trim();
   const douce = style.getPropertyValue('--encre-douce').trim();
-  const reglure = style.getPropertyValue('--reglure').trim();
+  const reglure = style.getPropertyValue('--filet').trim();
 
   const labels = donnees.map((d) => dateCourte(d.date));
   const taux = donnees.map((d) => (d.taux === null ? null : Math.round(d.taux * 100)));

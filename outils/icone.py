@@ -1,105 +1,56 @@
 # -*- coding: utf-8 -*-
 """
-Génère les icônes de l'application, dans le style du carnet.
+Génère les icônes de l'application, dans la direction « presse ».
 
-Le motif : une page de cahier. Un filet de marge rouge, trois réglures, trois
-lignes d'écriture manuscrite de longueurs différentes, et dans la marge trois
-coches à l'encre verte — la dernière à moitié tracée, qui est le geste propre
-à cette application.
+Le motif est celui de l'application elle-même, réduit à son geste : sur du
+papier journal, deux filets massifs comme ceux qui ouvrent et ferment la liste,
+un filet rouge de manchette, et entre les deux le pavé d'une habitude, cerné
+d'encre et rempli aux deux tiers par le bas.
 
-Aucune bibliothèque : le PNG est écrit à la main (zlib + struct), et le dessin
-se fait par distance aux segments, ce qui donne l'anticrénelage gratuitement.
+Aucune bibliothèque : le PNG est écrit à la main (zlib + struct). Tout le
+dessin est fait de rectangles à bords droits, dont on calcule exactement la
+part recouvrant chaque pixel — c'est ce qui donne l'anticrénelage, sans
+suréchantillonnage.
 """
 
-import zlib, struct, math
+import zlib, struct
 
-PAPIER_HAUT = (0xf6, 0xea, 0xcb)
-PAPIER_BAS  = (0xea, 0xdc, 0xb2)
-REGLURE     = (0xa9, 0xb8, 0xd6)
-MARGE       = (0xc2, 0x48, 0x3a)
-ENCRE       = (0x23, 0x30, 0x4d)
-VERT        = (0x2f, 0x7d, 0x4f)
+PAPIER = (0xea, 0xe5, 0xda)
+ENCRE  = (0x14, 0x12, 0x0e)
+ROUGE  = (0xab, 0x23, 0x18)
 
-# Les trois lignes : ligne de base de la réglure, longueur de l'écriture, et
-# fraction de la coche déjà tracée (1 = faite, 0.45 = en cours).
-LIGNES = [
-    (0.285, 0.90, 1.00),
-    (0.530, 0.80, 1.00),
-    (0.775, 0.62, 0.68),
-]
-
-MARGE_X = 0.345          # position du filet de marge
-ECRITURE_X = 0.415       # là où commence l'écriture, après le filet
+# Le pavé, en coordonnées relatives : où il commence, où il finit, l'épaisseur
+# de son cerne, et la part déjà remplie en partant du bas.
+PAVE = (0.315, 0.360, 0.685, 0.730)
+CERNE = 0.052
+REMPLI = 0.66
 
 
-def melange(fond, dessus, a):
-    a = max(0.0, min(1.0, a))
-    return tuple(fond[i] + (dessus[i] - fond[i]) * a for i in range(3))
+def rects():
+    """La liste des rectangles à peindre, du fond vers le dessus.
 
+    Chacun est donné en (x0, y0, x1, y1, couleur), en fractions du côté.
+    """
+    x0, y0, x1, y1 = PAVE
+    r = [
+        # Les deux filets massifs : ceux qui ouvrent et ferment la liste.
+        (0.115, 0.135, 0.885, 0.185, ENCRE),
+        (0.115, 0.815, 0.885, 0.865, ENCRE),
+        # Le filet de manchette, la seule couleur de l'application.
+        (0.115, 0.205, 0.885, 0.232, ROUGE),
 
-def dist_seg(px, py, ax, ay, bx, by):
-    dx, dy = bx - ax, by - ay
-    l2 = dx * dx + dy * dy
-    t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / l2))
-    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
-
-
-def polyligne(points, fraction=1.0):
-    """Coupe une polyligne à une fraction de sa longueur totale : c'est ainsi
-    qu'une coche peut n'être qu'à moitié tracée."""
-    if fraction >= 1.0:
-        return points
-    total = sum(math.dist(points[i], points[i + 1]) for i in range(len(points) - 1))
-    cible = total * fraction
-    gardes, parcouru = [points[0]], 0.0
-    for i in range(len(points) - 1):
-        a, b = points[i], points[i + 1]
-        d = math.dist(a, b)
-        if parcouru + d >= cible:
-            t = (cible - parcouru) / d if d else 0
-            gardes.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
-            break
-        parcouru += d
-        gardes.append(b)
-    return gardes
-
-
-def coche(cx, cy, taille, fraction=1.0):
-    """La coche du carnet, tracée d'un geste, légèrement penchée."""
-    brut = [(-0.60, 0.02), (-0.42, 0.24), (-0.20, 0.46), (0.18, -0.14), (0.60, -0.54)]
-    ang = math.radians(-7)
-    pts = []
-    for x, y in polyligne(brut, fraction):
-        xr = x * math.cos(ang) - y * math.sin(ang)
-        yr = x * math.sin(ang) + y * math.cos(ang)
-        pts.append((cx + xr * taille, cy + yr * taille))
-    return pts
-
-
-def ecriture(x0, x1, y, graine):
-    """Une ligne d'écriture, rendue comme une suite de mots séparés par des
-    blancs. C'est le blanc entre les mots qui fait lire « du texte » plutôt
-    qu'un trait ondulé — et le tracé reste déterministe."""
-    alea = graine
-    def suivant():
-        nonlocal alea
-        alea = (alea * 1103515245 + 12345) & 0x7FFFFFFF
-        return alea / 0x7FFFFFFF
-
-    mots, x = [], x0
-    while x < x1 - 0.03:
-        longueur = min(0.075 + suivant() * 0.10, x1 - x)
-        n = max(4, int(longueur / 0.012))
-        pts = []
-        for i in range(n + 1):
-            t = i / n
-            # une ondulation légère : assez pour que ce soit une main,
-            # pas assez pour que le trait devienne une chenille
-            pts.append((x + longueur * t,
-                        y + math.sin(t * 9 + graine) * 0.0065))
-        mots.append(pts)
-        x += longueur + 0.030 + suivant() * 0.022
-    return mots
+        # Le pavé : un cadre plein, puis on recreuse l'intérieur.
+        (x0, y0, x1, y1, ENCRE),
+        (x0 + CERNE, y0 + CERNE, x1 - CERNE, y1 - CERNE, PAPIER),
+    ]
+    # Et le remplissage, qui monte depuis le bas de l'intérieur. Il déborde
+    # d'un cheveu sur le cerne : sans ce débordement, les pixels à demi
+    # couverts du bord intérieur resteraient gris et dessineraient un liseré.
+    e = 0.004
+    dedans_haut, dedans_bas = y0 + CERNE, y1 - CERNE
+    hauteur = (dedans_bas - dedans_haut) * REMPLI
+    r.append((x0 + CERNE - e, dedans_bas - hauteur, x1 - CERNE + e, dedans_bas + e, ENCRE))
+    return r
 
 
 def bruit(x, y):
@@ -111,46 +62,40 @@ def bruit(x, y):
 
 def dessiner(S, marge_interne=0.0):
     ech = 1 - marge_interne
+
     def n(v):
+        """Passe des fractions aux pixels, en resserrant si l'icône peut être
+        rognée par le système."""
         return (0.5 + (v - 0.5) * ech) * S
 
-    traits = []   # (points, rayon, couleur)
-    for i, (y, longueur, frac) in enumerate(LIGNES):
-        # la réglure, d'un bord à l'autre
-        traits.append(([(n(0.045), n(y)), (n(0.955), n(y))], 0.006 * S * ech, REGLURE))
-        # l'écriture, posée sur la réglure, en mots séparés
-        for mot in ecriture(ECRITURE_X, longueur, y - 0.055, 7 + i * 31):
-            traits.append(([(n(px), n(py)) for px, py in mot], 0.0135 * S * ech, ENCRE))
-        # la coche, dans la marge
-        traits.append((coche(n(0.185), n(y - 0.055), 0.115 * S * ech, frac),
-                       0.026 * S * ech, VERT))
-
-    # le filet de marge, par-dessus les réglures
-    traits.append(([(n(MARGE_X), n(-0.05)), (n(MARGE_X), n(1.05))], 0.0085 * S * ech, MARGE))
+    formes = [(n(a), n(b), n(c), n(d), coul) for a, b, c, d, coul in rects()]
 
     lignes = bytearray()
     for py in range(S):
         lignes.append(0)   # filtre PNG « None »
-        t = py / max(1, S - 1)
-        base = tuple(PAPIER_HAUT[i] + (PAPIER_BAS[i] - PAPIER_HAUT[i]) * t for i in range(3))
         for px in range(S):
-            c = base
-            x, y = px + 0.5, py + 0.5
-            for points, r, couleur in traits:
-                d = min(dist_seg(x, y, *points[k], *points[k + 1])
-                        for k in range(len(points) - 1)) if len(points) > 1 else 1e9
-                if d < r + 1:
-                    c = melange(c, couleur, (r - d) + 0.5)
-            g = bruit(px, py) * 7
+            c = PAPIER
+            for ax, ay, bx, by, couleur in formes:
+                # Part exacte du pixel recouverte par le rectangle : c'est le
+                # produit des recouvrements en x et en y, chacun entre 0 et 1.
+                lx = min(px + 1, bx) - max(px, ax)
+                ly = min(py + 1, by) - max(py, ay)
+                if lx <= 0 or ly <= 0:
+                    continue
+                a = min(lx, 1.0) * min(ly, 1.0)
+                c = tuple(c[i] + (couleur[i] - c[i]) * a for i in range(3))
+            g = bruit(px, py) * 6
             lignes += bytes(max(0, min(255, round(v + g))) for v in c)
     return bytes(lignes)
 
 
 def png(chemin, S, marge_interne=0.0):
     brut = dessiner(S, marge_interne)
+
     def bloc(t, d):
         c = t + d
         return struct.pack('>I', len(d)) + c + struct.pack('>I', zlib.crc32(c))
+
     data = (b'\x89PNG\r\n\x1a\n'
             + bloc(b'IHDR', struct.pack('>IIBBBBB', S, S, 8, 2, 0, 0, 0))
             + bloc(b'IDAT', zlib.compress(brut, 9))

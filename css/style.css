@@ -1,18 +1,16 @@
 /* ==========================================================================
-   style.css — direction artistique : LE CARNET.
+   style.css — direction artistique : LA PRESSE.
 
-   L'application est un cahier. Le fond n'est pas un vide sombre, c'est du
-   papier : un crème profond, légèrement jaune, avec son grain. Les habitudes
-   sont écrites dessus à l'encre bleu-noir, sur des réglures d'un bleu-violet
-   pâle, à droite d'un filet de marge rouge — un cahier français.
+   L'application est une page de journal. Papier journal légèrement gris,
+   encre noire, une seule couleur d'appoint : le rouge d'une manchette.
 
-   Les coches se posent DANS la marge, comme les annotations d'une copie
-   corrigée, jamais sur le texte. Et elles se dessinent : une ligne qui se
-   coche en douze fois voit son trait avancer d'un douzième à chaque tap.
+   Le parti pris tient en une phrase : des filets massifs, et du vide autour.
+   Un filet de 9 px ouvre et ferme la liste, des filets de 2,5 px séparent les
+   lignes, et le texte s'en écarte largement. Le texte est volontairement plus
+   petit que la ligne ne le permettrait — c'est ce qui laisse l'air respirer.
 
-   Une seule identité, pas de variante sombre : un carnet ne change pas de
-   couleur la nuit. Le crème est volontairement profond plutôt qu'éclatant,
-   pour rester tenable le soir.
+   Une ligne cochée reçoit un fond grisé et son nom s'éteint : sur quinze
+   lignes, l'œil trie sans lire.
 
    Contrainte n°1 inchangée : les habitudes du jour tiennent sur un seul écran
    ET le remplissent. ui-liste.js mesure la place et publie la hauteur d'une
@@ -21,37 +19,36 @@
 
 :root {
   /* Le papier */
-  --papier:      #f3e6c4;   /* la page : crème franchement jaune */
-  --papier-2:    #ece0b6;   /* surfaces secondaires, champs, bandes */
-  --papier-3:    #e2d4a4;   /* creux, pistes de jauge */
-  --bandeau:     #ece0b6;   /* le haut de la page, sous la barre d'état */
+  --papier:      #eae5da;   /* papier journal */
+  --papier-2:    #e1dbcd;   /* surfaces secondaires, champs */
+  --papier-3:    #d3ccbc;   /* creux, pistes de jauge */
+  --bandeau:     #eae5da;   /* le haut de la page : opaque, mais invisible */
 
-  /* Les encres */
-  --encre:       #23304d;   /* bleu-noir : le texte */
-  --encre-douce: #5f6b83;   /* second rang */
-  --encre-pale:  #9d9784;   /* ce qui est fait : une encre passée, chaude */
-  --reglure:     rgba(94, 118, 176, 0.32);   /* les lignes du cahier */
-  --reglure-fort:rgba(94, 118, 176, 0.52);
-  --marge:       #c2483a;   /* le filet de marge, rouge */
-  --vert:        #2f7d4f;   /* l'encre verte : ce qui est validé */
-  --vert-clair:  rgba(47, 125, 79, 0.115);
-  --rouge:       #b03a2b;
-  --ombre:       rgba(35, 48, 77, 0.28);   /* l'ombre portée des boîtes */
+  /* L'encre */
+  --encre:       #14120e;   /* noir d'impression */
+  --encre-douce: #57524a;   /* second rang */
+  --encre-pale:  #938d80;   /* ce qui est fait */
+  --filet:       rgba(20, 18, 14, 0.3);    /* filets fins */
+  --filet-fort:  rgba(20, 18, 14, 0.62);
+  --massif:      #14120e;                  /* les filets épais */
+  --grise:       rgba(20, 18, 14, 0.055);  /* le fond d'une ligne cochée */
 
-  --serif: "Iowan Old Style", Charter, "Palatino Linotype", Palatino, Georgia, serif;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --rouge:       #ab2318;   /* la seule couleur : celle d'une manchette */
+  --signal:      #14120e;   /* barres et jauges : à l'encre, comme le reste */
+  --ombre:       rgba(20, 18, 14, 0.32);
 
-  /* Zones sûres d'iOS. En application ajoutée, iOS pose un bandeau
-     translucide en haut de l'écran mais ne déclare pas toujours la zone sûre
-     correspondante : ui-liste.js mesure donc la place lui-même et réécrit
-     --haut au démarrage. En bas, rien n'est réservé. */
-  --haut: env(safe-area-inset-top);   /* ui-liste.js corrige si iOS se tait */
+  --titre: "Avenir Next Condensed", "HelveticaNeue-CondensedBold", "Helvetica Neue", system-ui, sans-serif;
+  --serif: Didot, "Bodoni 72", "Playfair Display", Georgia, serif;
+  --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Zones sûres d'iOS. En application ajoutée, iOS pose un bandeau translucide
+     en haut de l'écran mais ne déclare pas toujours la zone sûre
+     correspondante : ui-liste.js mesure la place lui-même et réécrit --haut au
+     démarrage. En bas, rien n'est réservé. */
+  --haut: env(safe-area-inset-top);
   --bas: env(safe-area-inset-bottom);
-  --respire: 9px;   /* le verre d’iOS déborde de quelques points sous la
-                       barre d’état : la première ligne s’en écarte */
+  --respire: 9px;
 
-  --rayon: 5px;      /* le papier ne s'arrondit pas beaucoup */
-  --rayon-l: 8px;
   --duree: 240ms;
   --courbe: cubic-bezier(0.32, 0.72, 0, 1);
 
@@ -60,45 +57,35 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overscroll-behavior: none;
-}
+html, body { margin: 0; padding: 0; height: 100%; overscroll-behavior: none; }
 
 body {
   background: var(--papier);
   color: var(--encre);
-  font-family: var(--serif);
+  font-family: var(--titre);
   font-size: 16px;
   line-height: 1.35;
-  /* L'utilisateur ne doit jamais pouvoir zoomer ou tirer la page par erreur. */
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
 }
 
-/* Le grain du papier, posé sur tout. Rien à télécharger : c'est un bruit SVG
-   inscrit dans la feuille de style, multiplié sur le crème. */
+/* Le grain du papier journal, posé sur tout. Rien à télécharger : c'est un
+   bruit SVG inscrit dans la feuille de style. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 100;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.45;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
 }
 
 button, input, textarea, select {
-  font: inherit;
-  color: inherit;
-  letter-spacing: inherit;
-  background: none;
-  border: 0;
-  margin: 0;
+  font: inherit; color: inherit; letter-spacing: inherit;
+  background: none; border: 0; margin: 0;
 }
 button { cursor: pointer; }
 
@@ -114,66 +101,58 @@ button { cursor: pointer; }
   opacity: 0;
   visibility: hidden;
   transition: transform var(--duree) var(--courbe),
-              opacity   var(--duree) var(--courbe),
+              opacity var(--duree) var(--courbe),
               visibility 0s linear var(--duree);
 }
 .ecran.actif {
-  transform: none;
-  opacity: 1;
-  visibility: visible;
+  transform: none; opacity: 1; visibility: visible;
   transition: transform var(--duree) var(--courbe),
-              opacity   var(--duree) var(--courbe),
-              visibility 0s;
+              opacity var(--duree) var(--courbe), visibility 0s;
 }
 .ecran.gauche { transform: translateX(-18%); opacity: 0; }
 
-@media (prefers-reduced-motion: reduce) {
-  .ecran { transition-duration: 1ms; }
-}
+@media (prefers-reduced-motion: reduce) { .ecran { transition-duration: 1ms; } }
 
-/* --- En-tête des écrans secondaires --------------------------------------- */
-/* L'en-tête réserve la zone sûre du haut. Sa hauteur suit --haut, que
-   ui-liste.js corrige au démarrage quand iOS ne la déclare pas. */
+/* --- En-tête des écrans secondaires : une manchette ------------------------ */
 
 .entete {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 12px;
-  padding: calc(var(--haut) + 13px) 16px 12px;
-  background: var(--papier-2);
-  border-bottom: 2px solid var(--marge);
-  box-shadow: 0 3px 0 -1px var(--reglure);
+  padding: calc(var(--haut) + 12px) 22px 9px;
+  border-bottom: 7px solid var(--massif);
 }
 .entete h1 {
   margin: 0;
-  font-size: 21px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1;
 }
 .entete .droite {
   margin-left: auto;
+  font-family: var(--serif);
   font-size: 13px;
   font-style: italic;
-  color: var(--encre-douce);
+  color: var(--rouge);
 }
-
 .retour {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  color: var(--marge);
-  font-size: 16px;
-  font-weight: 600;
+  gap: 2px;
+  color: var(--rouge);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   padding: 6px 8px 6px 0;
 }
-.retour::before { content: "‹"; font-size: 27px; font-weight: 400; line-height: 0.68; }
+.retour::before { content: "‹"; font-size: 22px; font-weight: 400; line-height: .6; letter-spacing: 0; }
 
 /* ==========================================================================
    ÉCRAN LISTE
    ========================================================================== */
 
-/* L'écran défile, mais d'un cheveu : la liste occupe exactement une hauteur
-   d'écran, et seul le bouton se trouve en dessous. */
 #ecran-liste {
   display: block;
   overflow-y: auto;
@@ -182,11 +161,9 @@ button { cursor: pointer; }
   padding: calc(var(--haut) + var(--respire)) 0 18px;
 }
 
-/* Le haut de la page, fixé à l'écran, opaque. Sans lui, dès qu'on fait défiler
-   d'un pixel pour atteindre le bouton, les premières habitudes glissent sous
-   la barre d'état d'iOS, qui y applique son bandeau de verre. Il est de la
-   couleur du papier : iOS y écrit l'heure en noir, une bande sombre la
-   rendrait illisible. */
+/* Le haut de la page, fixé à l'écran, opaque : sans lui, dès qu'on fait
+   défiler d'un pixel pour atteindre le bouton, les premières habitudes
+   glissent sous la barre d'état d'iOS, qui y applique son bandeau de verre. */
 #ecran-liste::before {
   content: "";
   position: fixed;
@@ -198,104 +175,89 @@ button { cursor: pointer; }
 }
 
 #lignes {
-  --h-ligne: 34px;   /* valeur de départ, recalculée par ui-liste.js */
+  --h-ligne: 46px;   /* valeur de départ, recalculée par ui-liste.js */
   position: relative;
-  /* Hauteur de secours avant le premier calibrage : ui-liste.js la remplace
-     par une mesure de window.innerHeight, plus fiable que le dvh. */
   height: calc(100vh - var(--haut) - var(--respire));
   height: calc(100dvh - var(--haut) - var(--respire));
   display: flex;
   flex-direction: column;
-  padding: 0 14px;
+  margin: 12px 22px 0;
+  padding: 4px 0;
+  /* Les deux filets massifs qui ouvrent et ferment la page. Ils sont compris
+     dans la hauteur fixée par ui-liste.js : les lignes se partagent ce qui
+     reste, la liste ne déborde donc jamais d'un pixel. */
+  border-top: 9px solid var(--massif);
+  border-bottom: 9px solid var(--massif);
 }
-
-/* Le filet de marge. Les coches se posent à sa gauche, le texte commence à sa
-   droite : il ne touche jamais une lettre. */
-#lignes::after {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 60px;
-  border-left: 1.5px solid var(--marge);
-  opacity: 0.8;
-  pointer-events: none;
-}
-body.repos #lignes::after { display: none; }
 
 .ligne {
   flex: 1 1 0;
   min-height: 0;
   display: flex;
   align-items: center;
-  padding: 0;
+  padding: 0 4px;
   text-align: left;
   position: relative;
   overflow: hidden;
   transition: background 200ms var(--courbe);
 }
-/* Les réglures du cahier : elles traversent la page de bord à bord, et le
-   filet de marge les croise, comme sur un vrai cahier. */
+/* Les filets entre les lignes : épais, mais le texte s'en écarte. */
 .ligne + .ligne::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
-  border-top: 1px solid var(--reglure);
+  border-top: 2.5px solid var(--massif);
 }
-/* Une ligne faite reçoit un lavis vert pâle et son nom s'éteint : ce qui
-   reste à faire est ce qui est écrit en pleine encre. */
-.ligne.faite { background: var(--vert-clair); }
+/* Une ligne cochée : un fond grisé, et le nom qui recule d'un cran. Le gris
+   reste léger à dessein — un jour bien rempli met dix lignes sur quinze dans
+   cet état, et un gris franc ferait passer le fait au premier plan alors que
+   c'est le reste à faire qu'il faut voir. */
+.ligne.faite { background: var(--grise); }
 
 /* Une ligne qui porte une information secondaire reçoit une fois et demie la
    hauteur d'une ligne simple — ui-liste.js en tient compte au calibrage. */
 .ligne.avec-note { flex-grow: 1.5; }
 
-/* Éclat bref au moment du cochage : l'encre qui prend sur le papier. */
+/* Éclat bref au moment du cochage. Jamais plus de 300 ms. */
 .ligne.eclat { animation: eclat 300ms ease-out; }
 @keyframes eclat {
-  from { background: rgba(47, 125, 79, 0.34); }
-  to   { background: var(--vert-clair); }
+  from { background: rgba(20, 18, 14, 0.26); }
+  to   { background: var(--grise); }
 }
 
-/* --- La marge et sa coche ------------------------------------------------- */
+/* --- La marque : un pavé qui se remplit par le bas ------------------------- */
 
-.marque {
-  flex: 0 0 46px;
-  display: grid;
-  place-items: center;
+.marque { flex: 0 0 38px; display: grid; place-items: center; }
+.pave {
+  position: relative;
+  overflow: hidden;
+  width:  clamp(17px, calc(var(--h-ligne) * 0.44), 24px);
+  height: clamp(17px, calc(var(--h-ligne) * 0.44), 24px);
+  border: 3.5px solid var(--encre);
 }
-.coche {
-  display: block;
-  width: clamp(20px, calc(var(--h-ligne) * 0.66), 34px);
-  height: clamp(20px, calc(var(--h-ligne) * 0.66), 34px);
-  transform: rotate(-7deg);   /* une main, pas une machine */
-  overflow: visible;
-}
-/* Le trait fantôme n'apparaît que sur les lignes qui se cochent en plusieurs
-   fois : il montre où la plume ira. Une habitude ordinaire pas encore faite
-   laisse la marge vide, comme dans un cahier. */
-.coche .fantome {
-  stroke: rgba(35, 48, 77, 0.26);
-  stroke-dasharray: 2.5 4.5;   /* un pointillé : le guide, pas la marque */
-}
-.coche .trait {
-  stroke: var(--vert);
-  /* Le trait se dessine : c'est le décalage du pointillé qui l'avance. */
-  transition: stroke-dashoffset 320ms var(--courbe);
+.pave i {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0;
+  background: var(--encre);
+  transition: height 320ms var(--courbe);
 }
 
 /* --- Le texte de la ligne ------------------------------------------------- */
 
 .txt {
   flex: 1 1 auto;
-  min-width: 0;      /* indispensable : c'est ce qui autorise la troncature */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1px;
-  padding-left: 14px;   /* on écrit APRÈS le filet de marge, jamais dessus */
+  gap: 2px;
+  padding-left: 16px;
 }
 .nom {
-  font-size: clamp(14px, calc(var(--h-ligne) * 0.53), 22px);
+  font-size: clamp(14px, calc(var(--h-ligne) * 0.42), 21px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1.12;
   white-space: nowrap;
   overflow: hidden;
@@ -303,7 +265,8 @@ body.repos #lignes::after { display: none; }
   transition: color 200ms var(--courbe);
 }
 .note {
-  font-size: clamp(10px, calc(var(--h-ligne) * 0.325), 14px);
+  font-family: var(--serif);
+  font-size: clamp(10.5px, calc(var(--h-ligne) * 0.26), 13.5px);
   font-style: italic;
   color: var(--encre-douce);
   line-height: 1.15;
@@ -311,107 +274,93 @@ body.repos #lignes::after { display: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ligne.faite .nom { color: var(--encre-pale); }
+.ligne.faite .nom { color: var(--encre-douce); }
 .ligne.faite .note { color: var(--encre-pale); }
 
-/* Le compteur est aussi un bouton : le taper retire une unité. Il a donc
-   l'aspect d'une petite boîte tracée en marge. Il ne disparaît jamais, même
-   quand le maximum vaut 1 — les jours de stade, par exemple. */
+/* Le compteur est aussi un bouton : le taper retire une unité. Un cartouche
+   noir, comme un chapeau de journal. Il ne disparaît jamais, même quand le
+   maximum vaut 1 — les jours de stade, par exemple. */
 .cpt {
   flex: 0 0 auto;
   white-space: nowrap;
-  margin-right: 10px;
-  padding: 2px 7px;
-  border: 1px solid var(--reglure-fort);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.28);
-  font-size: clamp(11px, calc(var(--h-ligne) * 0.36), 15px);
-  font-variant-numeric: oldstyle-nums;
-  color: var(--encre-douce);
-  line-height: 1.3;
+  padding: 4px 8px;
+  background: var(--massif);
+  color: var(--papier);
+  font-size: clamp(11px, calc(var(--h-ligne) * 0.28), 14px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 .cpt:empty { display: none; }
-.ligne.faite .cpt { color: var(--vert); border-color: rgba(47, 125, 79, 0.42); }
-.cpt.doute::after {
-  /* Le quota repose sur des heures non confirmées : on le signale. */
-  content: "?";
-  color: var(--marge);
-  margin-left: 3px;
-  font-style: italic;
-}
+.ligne.faite .cpt { background: var(--encre-pale); }
+.cpt.doute::after { content: " ?"; color: var(--papier); }
 
 /* Le seul autre élément de l'écran d'accueil — et le seul autorisé à passer
    sous la ligne de flottaison. */
-/* Le bouton pleine largeur qui mène à un autre écran : sur l'accueil vers
-   Progression, sous le graphique vers Détail. Une boîte tracée à l'encre, avec
-   son ombre portée, qui s'enfonce au toucher. */
 .bouton-ecran {
   display: block;
   width: 100%;
-  height: 54px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  background: var(--papier-2);
-  color: var(--encre);
-  box-shadow: 3px 3px 0 var(--ombre);
-  font-size: 17px;
-  font-style: italic;
-  transition: transform 90ms ease, box-shadow 90ms ease;
+  padding: 17px;
+  background: var(--massif);
+  color: var(--papier);
+  border-top: 9px solid var(--massif);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: opacity 90ms ease;
 }
-.bouton-ecran::after { content: " →"; font-style: normal; }
-.bouton-ecran:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
-
+.bouton-ecran:active { opacity: 0.78; }
 #bascule {
-  width: calc(100% - 28px);
-  /* Juste assez pour que le bouton passe sous la ligne de flottaison : il
-     faut faire défiler d'un cheveu pour l'atteindre, tandis que la dernière
+  width: calc(100% - 44px);
+  /* Juste assez pour que le bouton passe sous la ligne de flottaison : il faut
+     faire défiler d'un cheveu pour l'atteindre, tandis que la dernière
      habitude, elle, reste visible sans défiler. */
-  margin: 26px 14px 0;
+  margin: 30px 22px 0;
 }
 
-/* --- Le dimanche de repos : récompense rare, page soignée ------------------ */
+/* --- Le dimanche de repos -------------------------------------------------- */
 
 #repos {
-  min-height: calc(100vh - var(--haut) - var(--respire) - 88px);
-  min-height: calc(100dvh - var(--haut) - var(--respire) - 88px);
+  min-height: calc(100vh - var(--haut) - var(--respire) - 96px);
+  min-height: calc(100dvh - var(--haut) - var(--respire) - 96px);
   display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
   padding: 0 34px;
   text-align: center;
 }
 body.repos #repos { display: flex; }
 body.repos #lignes { display: none; }
 
-/* Un cachet de cire. */
 #repos .sceau {
-  width: 82px; height: 82px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, #d4604f, var(--marge) 62%, #93321f);
-  color: rgba(255, 240, 220, 0.88);
-  display: grid; place-items: center;
-  font-size: 34px;
-  box-shadow: inset 0 -3px 6px rgba(0,0,0,.3), 3px 4px 0 var(--ombre);
-  animation: souffle 5s ease-in-out infinite;
-}
-@keyframes souffle {
-  0%, 100% { transform: rotate(-4deg); }
-  50%      { transform: rotate(2deg) scale(1.03); }
+  padding: 7px 18px;
+  background: var(--rouge);
+  color: var(--papier);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  transform: rotate(-2.5deg);
 }
 #repos h2 {
   margin: 0;
-  font-size: 30px;
-  font-weight: 600;
-  line-height: 1.22;
-  letter-spacing: -0.015em;
+  font-family: var(--serif);
+  font-size: 33px;
+  font-weight: 700;
+  line-height: 1.15;
+  border-top: 7px solid var(--massif);
+  border-bottom: 7px solid var(--massif);
+  padding: 14px 0;
 }
 #repos p {
   margin: 0;
-  color: var(--encre-douce);
+  font-family: var(--serif);
   font-size: 15px;
   font-style: italic;
+  color: var(--encre-douce);
   max-width: 20em;
 }
 
@@ -423,140 +372,103 @@ body.repos #lignes { display: none; }
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px calc(var(--bas) + 44px);
+  padding: 0 22px calc(var(--bas) + 44px);
 }
 
-.bloc { padding: 20px 0; border-bottom: 1px solid var(--reglure); }
+.bloc { padding: 20px 0; border-bottom: 2.5px solid var(--massif); }
 .bloc:last-child { border-bottom: 0; }
-/* Les intitulés de section : de petites capitales à l'encre rouge, comme un
-   titre souligné dans un cahier. */
 .bloc > h2 {
-  margin: 0 0 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.13em;
+  margin: 0 0 13px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--marge);
+  color: var(--rouge);
 }
 
 /* --- Heures hors de la maison : l'élément dominant de l'écran ------------- */
 
-#bloc-heures {
-  margin-top: 16px;
-  padding: 18px 16px 16px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  background: var(--papier-2);
-  box-shadow: 3px 3px 0 var(--ombre);
-  text-align: center;
-}
-#bloc-heures > h2 { margin-bottom: 4px; }
+#bloc-heures { padding-top: 18px; text-align: center; }
+#bloc-heures > h2 { margin-bottom: 6px; }
 #heures-valeur {
+  font-family: var(--serif);
   font-size: 68px;
-  font-weight: 400;
-  font-variant-numeric: oldstyle-nums;
+  font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
-  margin: 6px 0 6px;
+  margin: 4px 0 6px;
 }
-#heures-valeur small {
-  font-size: 28px;
-  font-style: italic;
-  color: var(--encre-douce);
-}
+#heures-valeur small { font-size: 27px; color: var(--encre-douce); }
 #heures-etat {
+  font-family: var(--serif);
   font-size: 14px;
   font-style: italic;
   color: var(--encre-douce);
   min-height: 19px;
 }
-#heures-etat.propose { color: var(--marge); }
+#heures-etat.propose { color: var(--rouge); }
 
 .reglette { display: flex; align-items: center; gap: 12px; margin: 16px 0 14px; }
 .reglette button {
   flex: 0 0 auto;
   width: 46px; height: 46px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  background: var(--papier);
-  box-shadow: 2px 2px 0 var(--ombre);
+  border: 3px solid var(--massif);
   font-size: 22px;
-  transition: transform 90ms ease, box-shadow 90ms ease;
+  font-weight: 700;
+  transition: background 120ms;
 }
-.reglette button:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ombre); }
+.reglette button:active { background: var(--massif); color: var(--papier); }
 
-input[type="range"] {
-  flex: 1 1 auto;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 30px;
-  background: transparent;
-}
+input[type="range"] { flex: 1 1 auto; -webkit-appearance: none; appearance: none;
+  height: 30px; background: transparent; }
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 5px;
-  background: var(--papier-3);
-  border: 1px solid var(--reglure-fort);
-  border-radius: 4px;
-}
+  height: 5px; background: var(--massif); }
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 26px; height: 26px;
-  margin-top: -11px;
-  border-radius: 50%;
-  background: var(--marge);
-  border: 2px solid var(--papier);
-  box-shadow: 1px 2px 0 var(--ombre);
-}
-input[type="range"]::-moz-range-track {
-  height: 5px; background: var(--papier-3);
-  border: 1px solid var(--reglure-fort); border-radius: 4px;
-}
+  -webkit-appearance: none; width: 24px; height: 24px; margin-top: -9.5px;
+  background: var(--rouge); border: 3px solid var(--massif); }
+input[type="range"]::-moz-range-track { height: 5px; background: var(--massif); }
 input[type="range"]::-moz-range-thumb {
-  width: 22px; height: 22px; border: 2px solid var(--papier);
-  border-radius: 50%; background: var(--marge);
-}
+  width: 20px; height: 20px; background: var(--rouge); border: 3px solid var(--massif); }
 
-/* --- Boutons : des boîtes tracées, avec leur ombre portée ----------------- */
+/* --- Boutons : des cartouches, cernés ou pleins ---------------------------- */
 
 .btn {
   display: block;
   width: 100%;
-  padding: 14px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  background: var(--papier-2);
-  box-shadow: 3px 3px 0 var(--ombre);
-  font-size: 16.5px;
+  padding: 15px;
+  border: 3px solid var(--massif);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   text-align: center;
-  transition: transform 90ms ease, box-shadow 90ms ease;
+  transition: background 120ms, color 120ms;
 }
-.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ombre); }
-.btn.plein {
-  background: var(--vert);
-  border-color: #1f5c39;
-  color: #f4ecd6;
-  font-weight: 600;
-}
+.btn:active { background: var(--grise); }
+.btn.plein { background: var(--massif); color: var(--papier); }
+.btn.plein:active { background: var(--encre-douce); }
 .btn.discret {
-  background: transparent;
-  border-style: dashed;
-  border-color: var(--reglure-fort);
+  border-width: 1.5px;
+  border-color: var(--filet-fort);
   color: var(--encre-douce);
-  box-shadow: none;
+  font-family: var(--serif);
   font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.btn.discret:active { transform: none; background: var(--papier-2); }
 .btn:disabled {
-  background: transparent;
-  border: 1px dashed var(--reglure-fort);
+  border: 1.5px solid var(--filet);
   color: var(--encre-pale);
-  box-shadow: none;
-  transform: none;
+  background: transparent;
+  font-family: var(--serif);
   font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .btn-rang { display: flex; gap: 10px; }
 .btn-rang .btn { flex: 1 1 0; }
-.pile > * + * { margin-top: 13px; }
+.pile > * + * { margin-top: 11px; }
 
 /* --- Listes de l'écran progression ---------------------------------------- */
 
@@ -565,245 +477,140 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--reglure);
+  border-bottom: 1.5px solid var(--filet);
   width: 100%;
   text-align: left;
 }
 .item:last-child { border-bottom: 0; }
 .item .ptxt { flex: 1 1 auto; min-width: 0; }
-.item .ptitre { font-size: 17px; }
-.item .psous { font-size: 13px; font-style: italic; color: var(--encre-douce); margin-top: 2px; }
+.item .ptitre { font-size: 18px; font-weight: 700; letter-spacing: 0.01em; }
+.item .psous {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--encre-douce);
+  margin-top: 3px;
+}
 .item .paction {
   flex: 0 0 auto;
-  font-size: 14px;
-  color: var(--encre);
-  background: var(--papier-2);
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  padding: 6px 11px;
-  box-shadow: 2px 2px 0 var(--ombre);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--papier);
+  background: var(--massif);
+  padding: 8px 12px;
   white-space: nowrap;
 }
 .item.fait .ptitre { color: var(--encre-pale); }
 
-/* L'interrupteur « comme si j'étais allé au stade ». */
+/* L'interrupteur « jour de stade » et « comme si j'étais allé au stade ». */
 .voyant {
   flex: 0 0 auto;
-  width: 52px; height: 30px;
-  border-radius: 15px;
-  border: 1.5px solid var(--reglure-fort);
-  background: var(--papier-3);
+  width: 52px; height: 28px;
+  border: 3px solid var(--massif);
   padding: 2px;
-  transition: background 180ms var(--courbe), border-color 180ms;
+  background: var(--papier);
 }
 .voyant i {
   display: block;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--papier);
-  border: 1px solid var(--reglure-fort);
-  transition: transform 220ms var(--courbe), background 180ms;
+  width: 20px; height: 18px;
+  background: var(--filet);
+  transition: transform 200ms var(--courbe), background 160ms;
 }
-.interrupteur.actif .voyant { background: rgba(47,125,79,.24); border-color: var(--vert); }
-.interrupteur.actif .voyant i { transform: translateX(22px); background: var(--vert); border-color: var(--vert); }
-.interrupteur.actif .ptitre { color: var(--vert); }
+.interrupteur.actif .voyant i { transform: translateX(22px); background: var(--rouge); }
+.interrupteur.actif .ptitre { color: var(--rouge); }
 
-.vide { color: var(--encre-douce); font-size: 14px; font-style: italic; padding: 4px 0; }
+.vide {
+  font-family: var(--serif);
+  color: var(--encre-douce);
+  font-size: 14px;
+  font-style: italic;
+  padding: 4px 0;
+}
 
 .etiq {
   display: inline-block;
-  padding: 3px 8px;
-  border: 1px solid var(--marge);
-  border-radius: 3px;
-  font-size: 12px;
-  font-style: italic;
-  color: var(--marge);
+  padding: 4px 8px;
+  background: var(--rouge);
+  color: var(--papier);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 /* --- Statistiques --------------------------------------------------------- */
 
 .chiffres { display: flex; gap: 10px; }
-.chiffre {
-  flex: 1 1 0;
-  background: var(--papier-2);
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  box-shadow: 2px 2px 0 var(--ombre);
-  padding: 13px 6px 11px;
-  text-align: center;
-}
+.chiffre { flex: 1 1 0; border: 3px solid var(--massif); padding: 12px 6px 10px; text-align: center; }
 .chiffre b {
   display: block;
+  font-family: var(--serif);
   font-size: 34px;
-  font-weight: 400;
-  font-variant-numeric: oldstyle-nums;
+  font-weight: 700;
   line-height: 1;
 }
 .chiffre span {
   display: block;
+  font-family: var(--serif);
   font-size: 11.5px;
   font-style: italic;
   color: var(--encre-douce);
   margin-top: 6px;
 }
-.chiffre.bien b { color: var(--vert); }
-.chiffre.alerte b { color: var(--marge); }
+.chiffre.bien b { color: var(--encre); }
+.chiffre.alerte b { color: var(--rouge); }
 
-#regle-dimanche { font-style: italic; color: var(--encre-douce); }
+#regle-dimanche { font-family: var(--serif); font-style: italic; color: var(--encre-douce); }
 
-.graph {
-  height: 180px;
-  padding: 10px 8px 4px;
-  background: var(--papier-2);
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  box-shadow: 2px 2px 0 var(--ombre);
-  position: relative;
-}
-
-/* Le taux par habitude : des barres tracées à la règle. */
-/* Petit sur Progression, grand sur Détail. */
-.graph.petit { height: 122px; margin-bottom: 12px; }
+.graph { height: 180px; padding: 10px 8px 4px; border: 3px solid var(--massif); position: relative; }
+.graph.petit { height: 124px; margin-bottom: 14px; }
 .graph.grand { height: 250px; }
 
-/* --- Le rattrapage de la veille ------------------------------------------- */
-
-.rattrapage {
-  max-height: 52vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  border-top: 1px solid var(--reglure);
-}
-.veille {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 11px 4px;
-  text-align: left;
-  border-bottom: 1px solid var(--reglure);
-}
-.veille .marque-veille {
-  flex: 0 0 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border: 1.5px solid var(--reglure-fort);
-  border-radius: var(--rayon);
-  color: var(--vert);
-  font-size: 17px;
-  line-height: 1;
-}
-.veille .nom-veille {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: 16px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.veille.faite .marque-veille { border-color: var(--vert); background: var(--vert-clair); }
-.veille.faite .nom-veille { color: var(--encre-pale); }
-.veille:active { background: var(--vert-clair); }
-
-/* --- L'écran Détail : moyennes par période ------------------------------- */
-
-.periode { padding: 14px 0; border-bottom: 1px solid var(--reglure); }
-.periode:last-child { border-bottom: 0; }
-.periode h3 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
-
-.grand-taux { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-.grand-taux b {
-  font-size: 42px;
-  font-weight: 400;
-  font-variant-numeric: oldstyle-nums;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-.grand-taux span { font-size: 13.5px; font-style: italic; color: var(--encre-douce); }
-
-/* Une liste de faits : intitulé à gauche, valeur à droite, sur une réglure. */
-.faits { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0; }
-.faits dt {
-  padding: 6px 0;
-  font-size: 14.5px;
-  color: var(--encre-douce);
-  border-bottom: 1px solid var(--reglure);
-}
-.faits dd {
-  margin: 0;
-  padding: 6px 0;
-  text-align: right;
-  border-bottom: 1px solid var(--reglure);
-  font-variant-numeric: oldstyle-nums;
-}
-.faits dt:last-of-type, .faits dd:last-of-type { border-bottom: 0; }
-.faits dd b { font-size: 15.5px; font-weight: 600; }
-.faits dd i { font-size: 12.5px; color: var(--encre-pale); margin-left: 7px; }
-
-.tendance { margin-bottom: 14px; }
-.tendance b {
-  display: block;
-  font-size: 34px;
-  font-weight: 400;
-  font-variant-numeric: oldstyle-nums;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
-  white-space: nowrap;
-}
-.tendance span {
-  display: block;
-  margin-top: 3px;
-  font-size: 13.5px;
-  font-style: italic;
-  color: var(--encre-douce);
-}
-.tendance.hausse b { color: var(--vert); }
-.tendance.baisse b { color: var(--marge); }
-
-.barre { padding: 9px 0 10px; border-bottom: 1px solid var(--reglure); }
+/* Le taux par habitude, en barres réglées. */
+.barre { padding: 10px 0 11px; border-bottom: 1.5px solid var(--filet); }
 .barre:last-child { border-bottom: 0; }
 .barre .haut { display: flex; align-items: baseline; gap: 8px; }
 .barre .haut b {
   flex: 1 1 auto;
-  font-size: 16px;
-  font-weight: 400;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .barre .haut span {
-  flex: 0 0 auto; color: var(--encre-douce); font-size: 13px;
-  font-variant-numeric: oldstyle-nums;
+  flex: 0 0 auto;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--encre-douce);
 }
-.barre .piste {
-  height: 8px;
-  background: var(--papier-3);
-  border: 1px solid var(--reglure-fort);
-  border-radius: 2px;
-  margin-top: 7px;
-  overflow: hidden;
-}
-.barre .jauge {
-  height: 100%;
-  background: var(--vert);
-  transition: width 400ms var(--courbe);
-}
+.barre .piste { height: 9px; background: var(--papier-3); margin-top: 8px; overflow: hidden; }
+.barre .jauge { height: 100%; background: var(--signal); transition: width 400ms var(--courbe); }
+.barre.faible .jauge { background: var(--rouge); }
+.barre.faible .haut span { color: var(--rouge); }
+
 /* Les habitudes retirées de la liste, reléguées sous le classement. */
-.anciennes { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--reglure-fort); }
-.anciennes h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; color: var(--encre-douce); }
+.anciennes { margin-top: 18px; padding-top: 14px; border-top: 2.5px solid var(--massif); }
+.anciennes h3 {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--encre-douce);
+}
 .anciennes .barre .haut b { color: var(--encre-douce); }
 .oublier {
   flex: 0 0 auto;
   width: 28px; height: 28px;
   margin-left: 2px;
-  border: 1px solid var(--reglure-fort);
-  border-radius: 3px;
-  color: var(--marge);
+  border: 2px solid var(--rouge);
+  color: var(--rouge);
   font-size: 13px;
   line-height: 1;
 }
-.oublier:active { background: rgba(194, 72, 58, 0.14); }
-
-.barre.faible .jauge { background: var(--marge); }
-.barre.faible .haut span { color: var(--marge); }
-.barre.forte  .haut span { color: var(--vert); }
+.oublier:active { background: var(--rouge); color: var(--papier); }
 
 /* ==========================================================================
    OVERLAYS
@@ -815,17 +622,15 @@ input[type="range"]::-moz-range-thumb {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  background: rgba(60, 48, 26, 0.5);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: rgba(20, 18, 14, 0.62);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   animation: apparait 180ms ease-out;
 }
 .overlay[hidden] { display: none; }
 @keyframes apparait { from { opacity: 0; } to { opacity: 1; } }
 
-/* L'overlay GTG : une page entière, franche, sans échappatoire. */
-/* L'overlay occupe tout l'écran, y compris sous la barre d'état : il lui faut
-   sa propre bande opaque, sinon les habitudes se voient au travers. */
+/* L'overlay GTG : une pleine page, franche, sans échappatoire. */
 #overlay-gtg::before {
   content: "";
   position: absolute;
@@ -837,97 +642,108 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   gap: 22px;
-  padding: calc(var(--haut) + 28px) 28px calc(var(--bas) + 28px);
+  padding: calc(var(--haut) + 28px) 26px calc(var(--bas) + 28px);
   text-align: center;
   background: var(--papier);
 }
 #overlay-gtg h2 {
   margin: 0;
+  font-family: var(--serif);
   font-size: 46px;
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1.02;
+  border-top: 7px solid var(--massif);
+  border-bottom: 7px solid var(--massif);
+  padding: 12px 0;
   animation: monte 320ms var(--courbe);
 }
 @keyframes monte { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 #gtg-detail {
-  color: var(--encre-douce);
+  font-family: var(--serif);
   font-size: 16px;
   font-style: italic;
-  margin: -6px 0 0;
+  color: var(--encre-douce);
+  margin: -4px 0 0;
   max-width: 20em;
   line-height: 1.45;
 }
 #gtg-compte {
-  color: var(--marge);
-  font-size: 13px;
-  letter-spacing: 0.16em;
+  background: var(--rouge);
+  color: var(--papier);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  padding-bottom: 5px;
-  border-bottom: 1.5px solid var(--marge);
+  padding: 6px 13px;
 }
-#overlay-gtg .boutons { display: flex; flex-direction: column; gap: 13px; width: 100%; max-width: 310px; }
-#overlay-gtg .btn { padding: 18px; font-size: 18px; }
+#overlay-gtg .boutons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 310px; }
+#overlay-gtg .btn { padding: 18px; font-size: 16px; }
 
-/* Modale : une fiche glissée par le bas. */
+/* Modale : une dépêche glissée par le bas. */
 #modale { justify-content: flex-end; }
 .feuille {
   background: var(--papier);
-  border-top: 2px solid var(--marge);
-  border-radius: 10px 10px 0 0;
-  padding: 22px 18px calc(var(--bas) + 20px);
+  border-top: 9px solid var(--massif);
+  padding: 20px 22px calc(var(--bas) + 20px);
   max-height: 86vh;
   overflow-y: auto;
   animation: glisse 260ms var(--courbe);
 }
 @keyframes glisse { from { transform: translateY(100%); } to { transform: none; } }
-.feuille h2 { margin: 0 0 5px; font-size: 25px; font-weight: 600; letter-spacing: -0.015em; }
-.feuille p.intro { margin: 0 0 17px; color: var(--encre-douce); font-size: 14.5px; font-style: italic; }
+.feuille h2 { margin: 0 0 5px; font-family: var(--serif); font-size: 27px; font-weight: 700; }
+.feuille p.intro {
+  margin: 0 0 17px;
+  font-family: var(--serif);
+  font-size: 14.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+}
 
 .champ {
   width: 100%;
-  padding: 12px 13px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  background: rgba(255, 255, 255, 0.42);
-  font-family: var(--serif);
-  font-size: 16.5px;   /* 16 px minimum : en dessous, iOS zoome à la saisie */
+  padding: 12px;
+  border: 3px solid var(--massif);
+  background: var(--papier-2);
+  font-family: var(--titre);
+  font-size: 16.5px;
+  font-weight: 600;
   -webkit-user-select: text;
   user-select: text;
 }
-.champ:focus { outline: none; border-color: var(--marge); }
+.champ:focus { outline: none; border-color: var(--rouge); }
 
 .choix {
   display: flex;
   align-items: baseline;
   gap: 10px;
   width: 100%;
-  padding: 13px 4px;
-  border-bottom: 1px solid var(--reglure);
+  padding: 13px 2px;
+  border-bottom: 1.5px solid var(--filet);
   text-align: left;
 }
 .choix:last-of-type { border-bottom: 0; }
-.choix b { flex: 0 0 108px; font-size: 18px; font-weight: 600; }
-.choix span { flex: 1 1 auto; font-size: 13.5px; font-style: italic; color: var(--encre-douce); line-height: 1.35; }
-.choix:active { background: var(--vert-clair); }
+.choix b { flex: 0 0 108px; font-size: 18px; font-weight: 700; }
+.choix span {
+  flex: 1 1 auto;
+  font-family: var(--serif);
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+  line-height: 1.35;
+}
+.choix:active { background: var(--grise); }
 
 /* ==========================================================================
    ÉDITEUR DE LISTE
    ========================================================================== */
 
-#zone-edition {
-  flex: 1 1 auto;
-  position: relative;
-  margin: 14px;
-  min-height: 0;
-}
+#zone-edition { flex: 1 1 auto; position: relative; margin: 14px 22px; min-height: 0; }
 #coloration, #edition {
   position: absolute;
   inset: 0;
   margin: 0;
   padding: 13px;
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
+  border: 3px solid var(--massif);
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.66;
@@ -938,136 +754,116 @@ input[type="range"]::-moz-range-thumb {
   overflow-y: auto;
   tab-size: 2;
 }
-#coloration {
-  color: var(--encre);
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 3px 3px 0 var(--ombre);
-}
+#coloration { color: var(--encre); pointer-events: none; background: var(--papier-2); }
 #edition {
   color: transparent;
-  caret-color: var(--marge);
+  caret-color: var(--rouge);
   background: transparent;
   resize: none;
   -webkit-user-select: text;
   user-select: text;
 }
 #edition:focus { outline: none; }
-#coloration b.m {
-  color: var(--marge);
-  background: rgba(194, 72, 58, 0.14);
-  border-radius: 3px;
-  font-weight: 600;
-}
-#coloration b.w {
-  color: #2a5ca8;
-  background: rgba(42, 92, 168, 0.14);
-  border-radius: 3px;
-  padding: 0 2px;
-  font-weight: 600;
-}
-#coloration b.c {
-  color: var(--vert);
-  background: rgba(47, 125, 79, 0.15);
-  border-radius: 3px;
-  font-weight: 600;
-}
+#coloration b.m { color: var(--rouge); background: rgba(171, 35, 24, .15); font-weight: 700; }
+#coloration b.w { color: var(--papier); background: var(--massif); padding: 0 3px; font-weight: 700; }
+#coloration b.c { color: var(--papier); background: var(--rouge); padding: 0 3px; font-weight: 700; }
 #coloration span.err {
   display: inline-block;
   width: 100%;
-  text-decoration: underline wavy var(--marge);
+  text-decoration: underline wavy var(--rouge);
   text-underline-offset: 4px;
 }
 
 .aide {
-  padding: 0 16px calc(var(--bas) + 14px);
+  padding: 0 22px calc(var(--bas) + 14px);
+  font-family: var(--serif);
   font-size: 13px;
   font-style: italic;
   color: var(--encre-douce);
   line-height: 1.5;
 }
-.aide code { font-family: var(--mono); font-size: 12px; font-style: normal; color: var(--encre); }
+.aide code {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+  background: var(--papier-3);
+  padding: 1px 4px;
+  color: var(--encre);
+}
 #etat-edition { color: var(--encre-pale); min-height: 17px; display: block; margin-top: 5px; }
-#etat-edition.erreur { color: var(--marge); }
+#etat-edition.erreur { color: var(--rouge); font-style: normal; font-weight: 700; }
 
 /* ==========================================================================
    ÉCRAN RÈGLES
    ========================================================================== */
 
-.groupe {
-  background: var(--papier-2);
-  border: 1.5px solid var(--encre);
-  border-radius: var(--rayon);
-  box-shadow: 3px 3px 0 var(--ombre);
-  padding: 15px 14px 5px;
-  margin-bottom: 14px;
+.groupe { border: 3px solid var(--massif); padding: 14px 13px 4px; margin-bottom: 13px; }
+.groupe h3 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .01em; }
+.aide-groupe {
+  margin: 3px 0 13px;
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--encre-douce);
 }
-.groupe h3 { margin: 0; font-size: 19px; font-weight: 600; }
-.aide-groupe { margin: 3px 0 13px; font-size: 13px; font-style: italic; color: var(--encre-douce); }
 .ligne-champ { display: block; margin-bottom: 12px; }
 .ligne-champ .etiquette {
   display: block;
-  font-size: 11.5px;
-  letter-spacing: 0.11em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--marge);
+  color: var(--rouge);
   margin-bottom: 5px;
 }
 .avec-unite { display: flex; align-items: center; gap: 10px; }
-.avec-unite .champ.court { width: 106px; text-align: center; }
-.avec-unite .unite { font-size: 16px; font-style: italic; color: var(--encre-douce); }
+.avec-unite .champ.court { width: 104px; text-align: center; }
+.avec-unite .unite { font-family: var(--serif); font-size: 16px; font-style: italic; color: var(--encre-douce); }
 
-.regle { padding: 16px 0; border-bottom: 1px solid var(--reglure); }
+.regle { padding: 15px 0; border-bottom: 1.5px solid var(--filet); }
 .regle:last-child { border-bottom: 0; }
 .entete-regle { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .titre-regle {
   flex: 1 1 auto;
   min-width: 0;
-  font-family: var(--serif);
+  font-family: var(--titre);
   font-size: 19px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--encre);
   background: transparent;
-  border: 1px dashed transparent;
-  border-radius: var(--rayon);
+  border: 1.5px dashed transparent;
   padding: 3px 6px;
   margin-left: -6px;
   -webkit-user-select: text;
   user-select: text;
 }
-.titre-regle:focus {
-  outline: none;
-  border-color: var(--reglure-fort);
-  background: rgba(255, 255, 255, 0.4);
-}
+.titre-regle:focus { outline: none; border-color: var(--filet-fort); background: var(--papier-2); }
 .supprimer-regle {
   flex: 0 0 auto;
-  width: 34px; height: 34px;
-  border: 1px solid var(--reglure-fort);
-  border-radius: var(--rayon);
-  color: var(--marge);
-  font-size: 15px;
+  width: 32px; height: 32px;
+  border: 2px solid var(--rouge);
+  color: var(--rouge);
+  font-size: 14px;
   line-height: 1;
 }
-.supprimer-regle:active { background: rgba(194, 72, 58, 0.14); }
+.supprimer-regle:active { background: var(--rouge); color: var(--papier); }
 
-/* Une consigne dont le titre ne renvoie à aucune habitude de la liste :
-   reste probablement d'une habitude supprimée ou renommée. */
 .orpheline { display: none; }
 .est-orpheline .orpheline {
   display: inline-block;
-  margin: 0 0 6px 0;
-  padding: 2px 7px;
-  border: 1px solid var(--marge);
-  border-radius: 3px;
-  font-size: 12px;
-  font-style: italic;
-  color: var(--marge);
+  margin: 0 0 6px;
+  padding: 3px 7px;
+  background: var(--rouge);
+  color: var(--papier);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .regle textarea {
   width: 100%;
-  border: 1px dashed transparent;
-  border-radius: var(--rayon);
+  border: 1.5px dashed transparent;
   padding: 6px 8px;
   margin-left: -8px;
   font-family: var(--serif);
@@ -1084,6 +880,107 @@ input[type="range"]::-moz-range-thumb {
 .regle textarea:focus {
   outline: none;
   color: var(--encre);
-  border-color: var(--reglure-fort);
-  background: rgba(255, 255, 255, 0.4);
+  border-color: var(--filet-fort);
+  background: var(--papier-2);
 }
+
+/* ==========================================================================
+   ÉCRAN DÉTAIL
+   ========================================================================== */
+
+/* Le rattrapage de la veille. */
+.rattrapage {
+  max-height: 52vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 2.5px solid var(--massif);
+}
+.veille {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 11px 2px;
+  text-align: left;
+  border-bottom: 1.5px solid var(--filet);
+}
+.veille .marque-veille {
+  flex: 0 0 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--massif);
+  font-size: 0;
+}
+.veille .nom-veille {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.veille.faite .marque-veille { background: var(--massif); }
+.veille.faite .nom-veille { color: var(--encre-pale); }
+.veille:active { background: var(--grise); }
+
+/* Les moyennes par période. */
+.periode { padding: 14px 0; border-bottom: 1.5px solid var(--filet); }
+.periode:last-child { border-bottom: 0; }
+.periode h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.grand-taux { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.grand-taux b { font-family: var(--serif); font-size: 44px; font-weight: 700; line-height: 1; }
+.grand-taux span {
+  font-family: var(--serif);
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+}
+
+.faits { margin: 0; display: grid; grid-template-columns: 1fr auto; }
+.faits dt {
+  padding: 6px 0;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--encre-douce);
+  border-bottom: 1.5px solid var(--filet);
+}
+.faits dd {
+  margin: 0;
+  padding: 6px 0;
+  text-align: right;
+  border-bottom: 1.5px solid var(--filet);
+}
+.faits dt:last-of-type, .faits dd:last-of-type { border-bottom: 0; }
+.faits dd b { font-size: 16px; font-weight: 700; }
+.faits dd i { font-family: var(--serif); font-size: 13px; color: var(--encre-pale); margin-left: 7px; }
+
+.tendance { margin-bottom: 14px; }
+.tendance b {
+  display: block;
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.tendance span {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--serif);
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+}
+.tendance.hausse b { color: var(--encre); }
+.tendance.baisse b { color: var(--rouge); }
+
+/* Les jours forts et les paliers atteints : rien d'ajouté, seulement l'encre
+   pleine là où le reste est en demi-teinte. */
+.barre.forte .haut span { color: var(--encre); }
+.tendance.stable b { color: var(--encre-douce); }
