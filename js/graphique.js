@@ -9,12 +9,13 @@
 //
 // Deux mesures possibles en ordonnée :
 //
-//  - « ratés » : le nombre de cases non cochées dans la journée, axe renversé,
-//    le zéro en haut. C'est la mesure juste quand la liste ne fait pas la même
-//    longueur tous les jours : un jeudi où trois habitudes sont masquées, le
-//    pourcentage compare une journée de douze cases à une journée de quinze,
-//    alors que le nombre de ratés compte la même chose partout. L'axe renversé
-//    garde la lecture d'un coup d'œil : rien qui pend, journée parfaite.
+//  - « ratés » : le nombre de cases non cochées dans la journée. C'est la
+//    mesure juste quand la liste ne fait pas la même longueur tous les jours :
+//    un jeudi où trois habitudes sont masquées, le pourcentage compare une
+//    journée de douze cases à une journée de quinze, alors que le nombre de
+//    ratés compte la même chose partout. L'axe est renversé — le zéro en haut
+//    — et la barre part du bas pour monter jusqu'à sa valeur : une barre haute
+//    est une bonne journée, exactement comme en pourcentage.
 //
 //  - « réussite » : le pourcentage, conservé parce qu'il répond à l'autre
 //    question — quelle part de ma journée est-ce que je fais.
@@ -52,14 +53,31 @@ function etiquette(labels, pas) {
 }
 
 /**
- * Le plafond de l'axe des ratés : le pire jour de la fenêtre, arrondi au
- * multiple de cinq supérieur. L'échelle ne saute donc pas d'un cran chaque
- * fois qu'une journée gagne ou perd un raté.
+ * Le plafond de l'axe des ratés : le nombre de ratés à partir duquel la barre
+ * disparaît tout à fait.
+ *
+ * Il est fixe, et c'est un choix. Le faire suivre le pire jour de la fenêtre
+ * remplirait toujours la hauteur, mais l'échelle changerait d'une fenêtre à
+ * l'autre : une semaine calme et une semaine difficile se ressembleraient, et
+ * une seule très mauvaise journée écraserait toutes les autres. Fixe, toutes
+ * les fenêtres se comparent entre elles d'un coup d'œil.
+ *
+ * Douze, parce que c'est la plus courte des listes du propriétaire. Au-delà,
+ * il n'y a plus de barre du tout — une journée à quinze ratés se lit comme une
+ * journée à douze, ce qui est sans importance : à ce niveau-là on ne cherche
+ * plus à mesurer, on constate.
  */
-function plafondRates(valeurs) {
-  const connues = valeurs.filter((v) => v !== null);
-  const pire = connues.length ? Math.max(...connues) : 0;
-  return Math.max(5, Math.ceil(pire / 5) * 5);
+const PLAFOND_RATES = 12;
+
+/**
+ * Le pas des graduations : le plus petit qui divise le plafond et laisse au
+ * plus cinq intervalles. Douze donne trois — 0, 3, 6, 9, 12.
+ */
+function pasAxe(plafond) {
+  for (const pas of [1, 2, 3, 4, 5, 10, 20, 25, 50]) {
+    if (plafond % pas === 0 && plafond / pas <= 5) return pas;
+  }
+  return Math.ceil(plafond / 5);
 }
 
 /**
@@ -79,8 +97,11 @@ export function dessinerGraphique(toile, donnees, { mesure = 'rates', cible = 6 
 
   const ratés = mesure === 'rates';
   const labels = donnees.map((d) => dateCourte(d.date));
+  // En ratés, la valeur est plafonnée : au-delà du plafond la barre n'existe
+  // plus, et il vaut mieux la ramener sur le bord que la laisser déborder du
+  // cadre. L'infobulle, elle, dit toujours le vrai nombre.
   const valeurs = donnees.map((d) => (ratés
-    ? d.rates
+    ? (d.rates === null ? null : Math.min(d.rates, PLAFOND_RATES))
     : (d.taux === null ? null : Math.round(d.taux * 100))));
 
   // La journée en cours est dessinée plus pâle. Elle n'est pas finie : en
@@ -90,13 +111,16 @@ export function dessinerGraphique(toile, donnees, { mesure = 'rates', cible = 6 
   const couleurs = donnees.map((d) => (d.encours ? pale : encre));
 
   const pas = pasEtiquettes(labels.length, cible);
-  // Le plafond étant un multiple de cinq, cinq graduations tombent toujours
-  // sur des nombres entiers : 0 5 10 15 20 25, et non 0 6 12 18 25.
-  const plafond = plafondRates(valeurs);
+
+  // En ratés, l'axe est renversé — le zéro en haut — et la barre part du bas
+  // pour monter jusqu'à sa valeur. Peu de ratés donne donc une barre haute, et
+  // une journée parfaite une barre pleine. C'est la même lecture que le
+  // pourcentage : plus c'est haut, mieux c'est. `base` dit où la barre
+  // commence ; sans elle, Chart.js les fait pendre depuis le zéro.
   const axeY = ratés
-    ? { min: 0, max: plafond, reverse: true,
-        ticks: { stepSize: plafond / 5, callback: (v) => v } }
-    : { min: 0, max: 100, reverse: false,
+    ? { min: 0, max: PLAFOND_RATES, reverse: true, base: PLAFOND_RATES,
+        ticks: { stepSize: pasAxe(PLAFOND_RATES), callback: (v) => v } }
+    : { min: 0, max: 100, reverse: false, base: 0,
         ticks: { stepSize: 50, callback: (v) => `${v} %` } };
 
   const infobulle = (c) => {
@@ -119,6 +143,7 @@ export function dessinerGraphique(toile, donnees, { mesure = 'rates', cible = 6 
       existant.data.labels = labels;
       existant.data.datasets[0].data = valeurs;
       existant.data.datasets[0].backgroundColor = couleurs;
+      existant.data.datasets[0].base = axeY.base;
       const y = existant.options.scales.y;
       y.min = axeY.min; y.max = axeY.max; y.reverse = axeY.reverse;
       y.ticks.stepSize = axeY.ticks.stepSize;
@@ -140,7 +165,7 @@ export function dessinerGraphique(toile, donnees, { mesure = 'rates', cible = 6 
     data: {
       labels,
       datasets: [{ type: 'bar', data: valeurs, backgroundColor: couleurs, borderRadius: 2,
-                   barPercentage: 0.72, categoryPercentage: 0.9 }],
+                   base: axeY.base, barPercentage: 0.72, categoryPercentage: 0.9 }],
     },
     options: {
       responsive: true,

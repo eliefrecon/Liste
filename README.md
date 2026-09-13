@@ -285,13 +285,24 @@ habitude supprimée.
   l'effacer définitivement (`oublierHabitude` dans `js/model.js`). Cet oubli ne
   recalcule pas les totaux journaliers : il ne doit pas réécrire le passé et
   transformer après coup une journée ratée en journée parfaite.
-- **Le graphique montre les ratés, axe renversé — et c'est plus juste que le
-  pourcentage.** Le pourcentage a un dénominateur qui bouge : un jeudi, où
-  plusieurs habitudes sont retirées, compare douze cases à quinze. Le nombre de
-  cases non cochées compte la même chose tous les jours. L'axe est renversé,
-  zéro en haut, pour garder la lecture d'un coup d'œil : rien qui pend, journée
-  parfaite. Le pourcentage reste disponible dans le second menu, parce qu'il
-  répond à l'autre question — quelle part de ma journée est-ce que je fais.
+- **Le graphique montre les ratés, et c'est plus juste que le pourcentage.**
+  Le pourcentage a un dénominateur qui bouge : un jeudi, où plusieurs habitudes
+  sont retirées, compare douze cases à quinze. Le nombre de cases non cochées
+  compte la même chose tous les jours. Le pourcentage reste disponible dans le
+  second menu, parce qu'il répond à l'autre question — quelle part de ma
+  journée est-ce que je fais.
+- **Dans les deux mesures, une barre haute est une bonne journée.** En ratés
+  l'axe est renversé, le zéro en haut, mais la barre part du bas et monte
+  jusqu'à sa valeur : zéro raté donne une barre pleine. C'est l'option `base`
+  du jeu de données qui dit où la barre commence ; sans elle, Chart.js les fait
+  pendre depuis le zéro, et le graphique se lit à l'envers de tous les autres.
+- **Le plafond des ratés est fixe, à douze** (`PLAFOND_RATES` dans
+  `js/graphique.js`), parce que c'est la plus courte des listes. Le faire
+  suivre le pire jour de la fenêtre remplirait toujours la hauteur, mais
+  l'échelle changerait d'une fenêtre à l'autre et une seule très mauvaise
+  journée écraserait toutes les autres. Fixe, toutes les fenêtres se comparent
+  entre elles. Au-delà de douze ratés il n'y a plus de barre du tout : à ce
+  niveau-là on ne cherche plus à mesurer, on constate.
 - **La fenêtre et la mesure du graphique sont dans l'état, pas dans l'écran.**
   Trois jours, une semaine, un mois, depuis le début : le choix vaut pour les
   deux graphiques à la fois et survit à la fermeture de l'application. C'est
