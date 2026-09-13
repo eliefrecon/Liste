@@ -596,6 +596,71 @@ input[type="range"]::-moz-range-thumb {
 
 #regle-dimanche { font-family: var(--serif); font-style: italic; color: var(--encre-douce); }
 
+/* --- Le graphique et ses commandes ---------------------------------------- */
+
+/* Le titre à gauche, la moyenne à droite : la ligne se lit comme un chapeau
+   d'article — de quoi on parle, et le chiffre qui résume. */
+.entete-graph { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.entete-graph h2 { margin: 0; flex: 1 1 auto; }
+.moyenne { flex: 0 0 auto; text-align: right; max-width: 58%; }
+.moyenne b {
+  display: block;
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 0.95;
+}
+.moyenne span {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--serif);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--encre-douce);
+  line-height: 1.2;
+}
+
+.commandes-graph { display: flex; gap: 8px; margin-bottom: 12px; }
+
+/* Un <select> natif, rhabillé. iOS ouvre son propre sélecteur au toucher :
+   c'est plus maniable au pouce que tout menu qu'on écrirait, et gratuit. */
+.menu { flex: 1 1 0; position: relative; display: block; min-width: 0; }
+.menu::after {
+  content: "▾";
+  position: absolute;
+  right: 9px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--rouge);
+  pointer-events: none;
+}
+.menu select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 10px 24px 10px 10px;
+  border: 2.5px solid var(--massif);
+  background: var(--papier);
+  font-family: var(--titre);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  border-radius: 0;
+}
+.menu select:focus { outline: none; border-color: var(--rouge); }
+
+.agrandir {
+  flex: 0 0 auto;
+  width: 44px;
+  border: 2.5px solid var(--massif);
+  background: var(--massif);
+  color: var(--papier);
+  font-size: 17px;
+  line-height: 1;
+}
+.agrandir:active { background: var(--encre-douce); }
+
 .graph { height: 180px; padding: 10px 8px 4px; border: 3px solid var(--massif); position: relative; }
 .graph.petit { height: 124px; margin-bottom: 14px; }
 .graph.grand { height: 250px; }
@@ -1016,3 +1081,76 @@ input[type="range"]::-moz-range-thumb {
    pleine là où le reste est en demi-teinte. */
 .barre.forte .haut span { color: var(--encre); }
 .tendance.stable b { color: var(--encre-douce); }
+
+/* --- Le graphique à l'écran entier ----------------------------------------- */
+
+/* Pensé pour être regardé en tournant le téléphone : tout est en colonne
+   souple, et c'est la toile qui absorbe la place restante. En paysage la
+   hauteur devient rare — l'en-tête et les menus se resserrent, l'astuce
+   disparaît. */
+#overlay-graph {
+  background: var(--papier);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: calc(var(--haut) + 10px) 16px calc(var(--bas) + 10px);
+  gap: 10px;
+}
+.barre-plein {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 7px solid var(--massif);
+}
+.titre-plein {
+  flex: 0 0 auto;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+}
+.moyenne-plein {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--encre-douce);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fermer-plein {
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border: 2.5px solid var(--massif);
+  font-size: 14px;
+  line-height: 1;
+}
+.fermer-plein:active { background: var(--massif); color: var(--papier); }
+.commandes-graph.dans-plein { margin-bottom: 0; }
+.graph-plein {
+  flex: 1 1 auto;
+  min-height: 0;
+  border: 3px solid var(--massif);
+  padding: 10px 8px 4px;
+}
+.astuce-plein {
+  flex: 0 0 auto;
+  margin: 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--encre-pale);
+}
+
+/* En paysage, la hauteur est la ressource rare : on rend au graphique tout ce
+   qui peut l'être. */
+@media (orientation: landscape) {
+  #overlay-graph { padding: calc(var(--haut) + 6px) 14px 8px; gap: 7px; }
+  .barre-plein { padding-bottom: 5px; border-bottom-width: 5px; }
+  .titre-plein { font-size: 17px; }
+  .fermer-plein { width: 30px; height: 30px; }
+  .menu select { padding: 6px 22px 6px 9px; font-size: 13px; }
+  .astuce-plein { display: none; }
+}

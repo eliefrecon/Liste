@@ -22,6 +22,7 @@ const FICHIERS = [
   './js/model.js',
   './js/ui-commun.js',
   './js/graphique.js',
+  './js/ui-graphique.js',
   './js/ui-liste.js',
   './js/ui-detail.js',
   './js/ui-progression.js',

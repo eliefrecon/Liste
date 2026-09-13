@@ -93,7 +93,7 @@
     </section>
 
     <section class="bloc">
-      <h2>Taux de réussite, 30 derniers jours</h2>
+      <h2 id="titre-graph-30">Ratés par jour</h2>
       <div class="graph petit"><canvas id="graph-30"></canvas></div>
       <div id="graph-secours" class="vide" hidden>Graphique indisponible hors ligne.</div>
       <button class="bouton-ecran" data-vers="detail">Détail</button>
@@ -129,8 +129,23 @@
     <h1>Détail</h1>
   </header>
   <div class="defilant">
-    <section class="bloc">
-      <h2>Taux de réussite, 30 derniers jours</h2>
+    <section class="bloc" id="bloc-graphique">
+      <div class="entete-graph">
+        <h2 id="titre-graph">Ratés par jour</h2>
+        <div class="moyenne">
+          <b id="moyenne-valeur">—</b>
+          <span id="moyenne-detail"></span>
+        </div>
+      </div>
+      <div class="commandes-graph">
+        <label class="menu">
+          <select id="graph-periode" aria-label="Période"></select>
+        </label>
+        <label class="menu">
+          <select id="graph-mesure" aria-label="Mesure"></select>
+        </label>
+        <button id="graph-agrandir" class="agrandir" aria-label="Agrandir le graphique">⤢</button>
+      </div>
       <div class="graph grand"><canvas id="graph-detail"></canvas></div>
       <div id="detail-secours" class="vide" hidden>Graphique indisponible hors ligne.</div>
     </section>
@@ -181,6 +196,22 @@
     <button class="btn plein" id="gtg-fait">Fait</button>
     <button class="btn" id="gtg-absent">Pas chez moi</button>
   </div>
+</div>
+
+<!-- Le graphique seul, à l'écran entier. Pensé pour être regardé en paysage :
+     c'est là qu'une fenêtre de plusieurs mois devient lisible. -->
+<div id="overlay-graph" class="overlay plein" hidden>
+  <div class="barre-plein">
+    <span class="titre-plein" id="titre-plein"></span>
+    <span class="moyenne-plein" id="moyenne-plein"></span>
+    <button id="graph-fermer" class="fermer-plein" aria-label="Fermer">✕</button>
+  </div>
+  <div class="commandes-graph dans-plein">
+    <label class="menu"><select id="plein-periode" aria-label="Période"></select></label>
+    <label class="menu"><select id="plein-mesure" aria-label="Mesure"></select></label>
+  </div>
+  <div class="graph-plein"><canvas id="graph-plein"></canvas></div>
+  <p class="astuce-plein">Tourne le téléphone : le graphique prend toute la largeur.</p>
 </div>
 
 <div id="modale" class="overlay" hidden>

@@ -12,11 +12,11 @@
 
 import { $, el, vider, confirmer, ouvrirModale, fermerModale } from './ui-commun.js';
 import {
-  serie30jours, statsPeriode, tauxParJourSemaine, tendance,
+  statsPeriode, tauxParJourSemaine, tendance,
   tauxParHabitude, oublierHabitude, series,
   veilleModifiable, cocherVeille,
 } from './model.js';
-import { dessinerTaux, graphiqueDisponible } from './graphique.js';
+import { rendreGraphiqueDetail } from './ui-graphique.js';
 import { dateLisible } from './dates.js';
 
 let api = null;
@@ -32,14 +32,10 @@ export function rendreDetail(etat, jour) {
   const cible = $('#detail-contenu');
   vider(cible);
 
-  // Le graphique vit dans index.html, hors de la zone reconstruite : sa toile
-  // reste le même élément d'un affichage à l'autre, et Chart.js peut la
-  // retrouver au lieu de peindre sur une toile détachée.
-  const toile = $('#graph-detail');
-  const secours = $('#detail-secours');
-  secours.hidden = graphiqueDisponible();
-  toile.hidden = !graphiqueDisponible();
-  dessinerTaux(toile, serie30jours(etat, jour), { hauteurEtiquettes: 5 });
+  // Le graphique et ses commandes vivent dans index.html, hors de la zone
+  // reconstruite : la toile reste le même élément d'un affichage à l'autre, et
+  // Chart.js peut la retrouver au lieu de peindre sur une toile détachée.
+  rendreGraphiqueDetail(etat, jour);
 
   cible.append(blocVeille(etat));
   cible.append(blocPeriodes(etat));

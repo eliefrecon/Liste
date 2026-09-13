@@ -12,10 +12,10 @@
 import { $, el, vider, montrer, ouvrirModale, fermerModale, confirmer, informer } from './ui-commun.js';
 import {
   formatHeures, confirmerHeures, lancerProtocole, arreterProtocole,
-  series, serie30jours, ratesDeLaSemaine, taper,
+  series, ratesDeLaSemaine, taper,
   protocolesActifs, SEUIL_COMME_STADE,
 } from './model.js';
-import { dessinerTaux, graphiqueDisponible } from './graphique.js';
+import { rendrePetitGraphique } from './ui-graphique.js';
 import { DUREES_PROTOCOLE } from './defaults.js';
 import { dateLisible, jourSemaine, nomJourSemaine } from './dates.js';
 import { exporterJSON, importerJSON } from './store.js';
@@ -295,17 +295,9 @@ function tuile(valeur, libelle, classe = '') {
 }
 
 function rendreGraphique(etat, jour) {
-  const secours = $('#graph-secours');
-  const toile = $('#graph-30');
-  if (!graphiqueDisponible()) {
-    secours.hidden = false;
-    toile.hidden = true;
-    return;
-  }
-  secours.hidden = true;
-  toile.hidden = false;
-  // En petit ici : le grand graphique et tout le reste sont sur l'écran Détail.
-  dessinerTaux(toile, serie30jours(etat, jour), { hauteurEtiquettes: 10 });
+  // En petit ici, sans commandes : la fenêtre et la mesure se choisissent sur
+  // l'écran Détail, et valent pour les deux graphiques.
+  rendrePetitGraphique(etat, jour);
 }
 
 // --- Export / import --------------------------------------------------------

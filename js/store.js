@@ -60,8 +60,26 @@ export function etatParDefaut() {
     histoire: {},
     protocoles: [],
     heuresLog: { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] },
+    // Ce que le graphique montre. Conservé d'une ouverture à l'autre : on
+    // regarde presque toujours la même fenêtre, ce serait pénible à
+    // reconfigurer chaque fois.
+    graphique: { jours: 30, mesure: 'rates' },
   };
 }
+
+/** Les fenêtres de temps proposées par le graphique. `null` = depuis le début. */
+export const PERIODES_GRAPHIQUE = [
+  { jours: 3, libelle: '3 jours' },
+  { jours: 7, libelle: '1 semaine' },
+  { jours: 30, libelle: '1 mois' },
+  { jours: null, libelle: 'Depuis le début' },
+];
+
+/** Ce que le graphique met en ordonnée. */
+export const MESURES_GRAPHIQUE = [
+  { cle: 'rates', libelle: 'Ratés' },
+  { cle: 'taux', libelle: 'Réussite' },
+];
 
 /**
  * Complète un état lu du stockage avec les champs manquants.
@@ -81,6 +99,15 @@ function consolider(brut) {
   const log = e.heuresLog && typeof e.heuresLog === 'object' ? e.heuresLog : {};
   e.heuresLog = {};
   for (let j = 0; j < 7; j++) e.heuresLog[j] = Array.isArray(log[j]) ? log[j] : [];
+
+  // Le graphique : on vérifie que la fenêtre et la mesure font partie de
+  // celles qui existent, sans quoi une vieille sauvegarde pourrait demander un
+  // affichage qu'on ne sait plus dessiner.
+  const g = { ...def.graphique, ...(brut && brut.graphique ? brut.graphique : {}) };
+  e.graphique = {
+    jours: PERIODES_GRAPHIQUE.some((p) => p.jours === g.jours) ? g.jours : def.graphique.jours,
+    mesure: MESURES_GRAPHIQUE.some((m) => m.cle === g.mesure) ? g.mesure : def.graphique.mesure,
+  };
 
   // Les réglages structurés : on complète champ par champ, pour qu'une
   // sauvegarde partielle ou ancienne ne laisse jamais un champ manquant.

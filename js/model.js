@@ -548,23 +548,73 @@ export function dernieresCles(n = 30, fin = cleAujourdhui()) {
   return out;
 }
 
+/** La plus ancienne journée connue, ou aujourd'hui si l'histoire est vide. */
+export function premiereCle(etat) {
+  const cles = Object.keys(etat.histoire).sort();
+  return cles.length ? cles[0] : etat.jour.date;
+}
+
 /**
- * Séries de données pour le graphique des 30 derniers jours.
- * La dernière barre est la journée en cours (non terminée).
+ * Séries de données pour le graphique.
+ *
+ * `jours` est le nombre de journées à montrer, la dernière étant celle en
+ * cours ; `null` signifie « depuis le début », c'est-à-dire depuis la plus
+ * ancienne journée enregistrée.
+ *
+ * Chaque entrée porte les deux mesures, le taux et le nombre de ratés : c'est
+ * le graphique qui choisit laquelle il dessine, pas le modèle. Les jours sans
+ * enregistrement — application non ouverte — sont marqués `vide` et valent
+ * null partout, ce qui les laisse en blanc au lieu de les compter comme des
+ * journées à zéro.
  */
-export function serie30jours(etat, jourCalcule) {
-  const cles = dernieresCles(30, etat.jour.date);
+export function serieJours(etat, jourCalcule, jours = 30) {
+  const cles = jours === null
+    ? clesDepuis(premiereCle(etat), etat.jour.date)
+    : dernieresCles(jours, etat.jour.date);
+
   return cles.map((k) => {
     if (k === etat.jour.date) {
-      return { date: k, faites: jourCalcule.faites, total: jourCalcule.total,
-               taux: jourCalcule.total ? jourCalcule.faites / jourCalcule.total : null,
+      const total = jourCalcule.total || 0;
+      const faites = jourCalcule.faites || 0;
+      return { date: k, faites, total, rates: total - faites,
+               taux: total ? faites / total : null,
                repos: jourCalcule.repos, encours: true };
     }
     const s = etat.histoire[k];
-    if (!s) return { date: k, faites: 0, total: 0, taux: null, vide: true };
-    return { date: k, faites: s.faites || 0, total: s.total || 0,
-             taux: s.total ? s.faites / s.total : null, repos: s.repos };
+    if (!s) return { date: k, faites: 0, total: 0, rates: null, taux: null, vide: true };
+    const total = s.total || 0;
+    const faites = s.faites || 0;
+    return { date: k, faites, total,
+             // Un dimanche de repos n'a aucune case : ni raté, ni taux.
+             rates: total ? (s.rates !== undefined ? s.rates : total - faites) : 0,
+             taux: total ? faites / total : null, repos: s.repos };
   });
+}
+
+/** Toutes les clés de jour de `debut` à `fin`, bornes comprises. */
+function clesDepuis(debut, fin) {
+  const out = [];
+  for (let k = debut; k <= fin; k = ajouterJours(k, 1)) out.push(k);
+  return out;
+}
+
+/**
+ * La moyenne des journées affichées par le graphique.
+ *
+ * Deux exclusions, les mêmes que partout ailleurs dans l'application : la
+ * journée en cours, qui n'est pas finie et tirerait la moyenne vers le bas, et
+ * les dimanches de repos, qui n'ont aucune case. Les journées sans
+ * enregistrement ne comptent pas non plus.
+ */
+export function moyenneSerie(serie) {
+  const comptees = serie.filter((d) => !d.encours && !d.vide && d.total > 0);
+  if (!comptees.length) return { jours: 0, taux: null, rates: null };
+  const somme = (f) => comptees.reduce((s, d) => s + f(d), 0);
+  return {
+    jours: comptees.length,
+    taux: somme((d) => d.taux) / comptees.length,
+    rates: somme((d) => d.rates) / comptees.length,
+  };
 }
 
 /**

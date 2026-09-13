@@ -17,6 +17,7 @@ import { $, montrer, surEntree, ecranCourant, fermerModale } from './ui-commun.j
 import { initListe, rendreListe } from './ui-liste.js';
 import { initProgression, rendreProgression } from './ui-progression.js';
 import { initDetail, rendreDetail } from './ui-detail.js';
+import { initGraphique, fermerPlein } from './ui-graphique.js';
 import { initEditeur, rendreEditeur } from './ui-editeur.js';
 import { initRegles, rendreRegles } from './ui-regles.js';
 
@@ -108,6 +109,7 @@ function repondre(fait) {
 function verifierJour() {
   if (assurerJour(etat)) {
     overlay().hidden = true;   // un overlay resté ouvert n'a plus de sens
+    fermerPlein();
     fermerModale();
     sauver();
     recalculer();
@@ -137,6 +139,7 @@ function demarrer() {
   initListe(api);
   initProgression(api);
   initDetail(api);
+  initGraphique(api);
   initEditeur(api);
   initRegles(api);
 

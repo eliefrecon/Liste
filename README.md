@@ -135,7 +135,8 @@ js/
   model.js        toute la logique : restrictions, quota GTG, protocoles,
                   bascule de journée, ratés, statistiques
   ui-commun.js    navigation entre écrans, modales
-  graphique.js    le graphique du taux, partagé par deux écrans
+  graphique.js    le dessin du graphique, partagé par trois toiles
+  ui-graphique.js les commandes du graphique : fenêtre, mesure, plein écran
   ui-liste.js     l'écran d'accueil
   ui-progression.js  le second écran
   ui-detail.js    l'écran Détail : moyennes, tendance, classements
@@ -284,10 +285,25 @@ habitude supprimée.
   l'effacer définitivement (`oublierHabitude` dans `js/model.js`). Cet oubli ne
   recalcule pas les totaux journaliers : il ne doit pas réécrire le passé et
   transformer après coup une journée ratée en journée parfaite.
-- **Le graphique des 30 jours montre un taux, pas un nombre de cases.** Le
-  dénominateur est le nombre d'habitudes réellement affichées ce jour-là : un
-  jeudi, où plusieurs habitudes sont retirées, tout cocher donne bien 100 %.
-  Deux journées de longueurs différentes deviennent ainsi comparables.
+- **Le graphique montre les ratés, axe renversé — et c'est plus juste que le
+  pourcentage.** Le pourcentage a un dénominateur qui bouge : un jeudi, où
+  plusieurs habitudes sont retirées, compare douze cases à quinze. Le nombre de
+  cases non cochées compte la même chose tous les jours. L'axe est renversé,
+  zéro en haut, pour garder la lecture d'un coup d'œil : rien qui pend, journée
+  parfaite. Le pourcentage reste disponible dans le second menu, parce qu'il
+  répond à l'autre question — quelle part de ma journée est-ce que je fais.
+- **La fenêtre et la mesure du graphique sont dans l'état, pas dans l'écran.**
+  Trois jours, une semaine, un mois, depuis le début : le choix vaut pour les
+  deux graphiques à la fois et survit à la fermeture de l'application. C'est
+  `etat.graphique`, et `consolider()` refuse une fenêtre ou une mesure qu'il ne
+  saurait pas dessiner.
+- **La journée en cours est dessinée plus pâle et n'entre dans aucune
+  moyenne.** Elle n'est pas finie : en ratés, elle en compte forcément beaucoup
+  le matin, et la lire comme une mauvaise journée n'aurait aucun sens.
+- **Les dates sous le graphique se comptent à rebours depuis la dernière.** La
+  date du jour est le repère qui compte le plus, elle doit toujours être
+  écrite ; compter depuis la première et forcer la dernière en plus produit
+  deux étiquettes collées quand le compte ne tombe pas juste.
 - **Le stockage a une version** (`VERSION` dans `js/store.js`). Quand une
   donnée nouvelle apparaît, on incrémente ce numéro et `consolider()` complète
   les sauvegardes déjà présentes sur le téléphone, sans rien effacer.
